@@ -12,5 +12,55 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
     <vm:MainViewModel />
   </Design.DataContext>
-
+    <Grid>
+    <views:SaveImageControl Name="SaveControl" Grid.Row="1" Grid.Column="0"/>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+      
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+    </Grid.ColumnDefinitions>
+      
+      <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
+        <Button HorizontalAlignment="Center" Content="Upload main"/>
+        <Button HorizontalAlignment="Center" Name="ClearMainButton" Content="X" IsEnabled="false"/>
+      </StackPanel>
+      
+      <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+        <Button HorizontalAlignment="Center" Content="Upload hidden"/>
+        <Button HorizontalAlignment="Center" Name="ClearHiddenButton" Content="X" IsEnabled="false"/>
+      </StackPanel>
+      
+      <views:ShaderImageControl Name="MainImage" Grid.Row="1" Grid.Column="0"/>
+      <views:ShaderImageControl Name="HiddenImage" Grid.Row="1" Grid.Column="1"/>
+      <views:ShaderImageControl Name="OutputLowImage" Grid.Row="2" Grid.Column="0"/>
+      <views:ShaderImageControl Name="NegativeImage" Grid.Row="2" Grid.Column="1"/>
+      <views:ShaderImageControl Name="OverlayImage" Grid.Row="3" Grid.Column="0"/>
+      <views:ShaderImageControl Name="StitchedImages" Grid.Row="4" Grid.Column="0"/>
+      <views:ShaderImageControl Name="GammaImage" Grid.Row="4" Grid.Column="1"/>
+    
+      <StackPanel Grid.Row="2" Grid.Column="2">
+        <TextBlock Text="Output low" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
+        <Slider x:Name="OutputLowSlider" Minimum="0" Maximum="255" TickFrequency="1" IsSnapToTickEnabled="True"/>
+      </StackPanel>
+      
+      <StackPanel Grid.Row="3" Grid.Column="2">
+        <TextBlock Text="Opacity" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
+        <Slider x:Name="OpacitySlider" Minimum="0" Maximum="255" TickFrequency="1" IsSnapToTickEnabled="True"/>
+      </StackPanel>
+      
+      <StackPanel Grid.Row="4" Grid.Column="2">
+        <TextBlock Text="Gamma" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
+        <Slider x:Name="GammaSlider" Minimum="0.01" Maximum="0.45455" TickFrequency="0.002" IsSnapToTickEnabled="True"/>
+      </StackPanel>
+     
+      <Button HorizontalAlignment="Center" IsEnabled="True" Name="SaveButton" Content="Save"/>
+  </Grid>
 </UserControl>
