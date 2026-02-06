@@ -29,12 +29,12 @@
     </Grid.ColumnDefinitions>
       
       <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
-        <Button HorizontalAlignment="Center" Content="Upload main"/>
+        <Button HorizontalAlignment="Center" Command="{Binding LoadMainImageCommand}" Content="Upload main"/>
         <Button HorizontalAlignment="Center" Name="ClearMainButton" Content="X" IsEnabled="false"/>
       </StackPanel>
       
       <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
-        <Button HorizontalAlignment="Center" Content="Upload hidden"/>
+        <Button HorizontalAlignment="Center" Command="{Binding LoadHiddenImageCommand}" Content="Upload hidden"/>
         <Button HorizontalAlignment="Center" Name="ClearHiddenButton" Content="X" IsEnabled="false"/>
       </StackPanel>
       
@@ -61,6 +61,6 @@
         <Slider x:Name="GammaSlider" Minimum="0.01" Maximum="0.45455" TickFrequency="0.002" IsSnapToTickEnabled="True"/>
       </StackPanel>
      
-      <Button HorizontalAlignment="Center" IsEnabled="True" Name="SaveButton" Content="Save"/>
+      <Button HorizontalAlignment="Center" Command="{Binding SaveImageCommand}" IsEnabled="True" Name="SaveButton" Content="Save"/>
   </Grid>
 </UserControl>
