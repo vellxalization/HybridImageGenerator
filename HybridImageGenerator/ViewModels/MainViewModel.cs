@@ -13,8 +13,10 @@ public partial class MainViewModel : ViewModelBase {
     private Rect _controlsBounds;
     
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SaveImageCommand))]
     private SKShader? _mainShader;
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SaveImageCommand))]
     private SKShader? _hiddenShader;
     [ObservableProperty]
     private SKShader? _outputLowShader;
@@ -90,7 +92,7 @@ public partial class MainViewModel : ViewModelBase {
         ImageEditor.TrySetHiddenImage(image, out _);
     }
     
-    [RelayCommand]
+    [RelayCommand(CanExecute=nameof(CanSave))]
     private async Task SaveImage() {
         using var patchedImage = await ImageEditor.Save();
         await using Stream? file = await _fileService.SelectSaveFile();
@@ -99,4 +101,6 @@ public partial class MainViewModel : ViewModelBase {
         patchedImage.Position = 0;
         await patchedImage.CopyToAsync(file);
     }
+
+    private bool CanSave() => MainShader is not null && HiddenShader is not null;
 }
