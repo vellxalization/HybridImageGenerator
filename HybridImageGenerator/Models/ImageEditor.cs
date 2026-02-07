@@ -15,6 +15,8 @@ public class ImageEditor {
     private SKImage? _mainImage;
     private SKImage? _hiddenImage;
 
+    public ShaderToImageConverter? Converter { get; set; }
+
     public event EventHandler<SKShader?>? MainShaderChanged; 
     public event EventHandler<SKShader?>? HiddenShaderChanged; 
     public event EventHandler<SKShader?>? OutputLowShaderChanged; 
@@ -32,7 +34,6 @@ public class ImageEditor {
     private PipelineNode<GammaFactory> _gammaNode;
 
     private readonly CombinedFactory _combinedFactory = new();
-    private readonly ShaderToImageConverter _converter;
     
     // all images are scaled to fit controls and all controls must be the same size
     private Size _renderSize;
@@ -198,47 +199,52 @@ public class ImageEditor {
         return SKMatrix.CreateScaleTranslation(scale, scale, xTranslation, yTranslation);
     }
     
-    // public async Task<MemoryStream> Save() {
-    //     if (!IsValidSkiaObject(_mainImage))
-    //         throw new SkiaObjectInvalidStateException("Main image is invalid");
-    //     
-    //     if (!IsValidSkiaObject(_hiddenImage))
-    //         throw new SkiaObjectInvalidStateException("Hidden image is invalid");
-    //     
-    //     var inputShader = _mainImage!.ToShader();
-    //     if (!IsValidSkiaObject(inputShader)) {
-    //         inputShader?.Dispose();
-    //         throw new SkiaObjectInvalidStateException("Failed to generate a shader from main image");
-    //     }
-    //     
-    //     var overlayShader = _hiddenImage!.ToShader();
-    //     if (!IsValidSkiaObject(overlayShader)) {
-    //         overlayShader?.Dispose();
-    //         throw new SkiaObjectInvalidStateException("Failed to generate a shader from hidden image");
-    //     }
-    //     
-    //     _combinedFactory.InputShader?.Dispose();
-    //     _combinedFactory.OverlayShader?.Dispose();
-    //     _combinedFactory.InputShader = inputShader;
-    //     _combinedFactory.OverlayShader = overlayShader;
-    //     _combinedFactory.OutputLow = _outputLow;
-    //     _combinedFactory.Opacity = _opacity;
-    //     
-    //     using var shader = _combinedFactory.GenerateOutputShader();
-    //     var size = new SKRect(0, 0, _mainImage.Width, _mainImage.Height);
-    //     using var data = await _converter.Convert(size, shader!);
-    //     if (!IsValidSkiaObject(data))
-    //         throw new SkiaObjectInvalidStateException("Failed to convert output shader to an image");
-    //     
-    //     var memoryStream = new MemoryStream((int)data!.Size);
-    //     await using var dataStream = data.AsStream();
-    //     await dataStream.CopyToAsync(memoryStream);
-    //     PngPatcher.PatchGamma(memoryStream, _gamma);
-    //     
-    //     return memoryStream;
-    // }
+    public async Task<MemoryStream> Save() {
+        if (Converter is null)
+            throw new ConverterIsMissingException();
+        
+        if (!IsValidSkiaObject(_mainImage))
+            throw new SkiaObjectInvalidStateException("Main image is invalid");
+        
+        if (!IsValidSkiaObject(_hiddenImage))
+            throw new SkiaObjectInvalidStateException("Hidden image is invalid");
+        
+        var inputShader = _mainImage!.ToShader();
+        if (!IsValidSkiaObject(inputShader)) {
+            inputShader?.Dispose();
+            throw new SkiaObjectInvalidStateException("Failed to generate a shader from main image");
+        }
+        
+        var overlayShader = _hiddenImage!.ToShader();
+        if (!IsValidSkiaObject(overlayShader)) {
+            overlayShader?.Dispose();
+            throw new SkiaObjectInvalidStateException("Failed to generate a shader from hidden image");
+        }
+        
+        _combinedFactory.InputShader?.Dispose();
+        _combinedFactory.OverlayShader?.Dispose();
+        _combinedFactory.InputShader = inputShader;
+        _combinedFactory.OverlayShader = overlayShader;
+        _combinedFactory.OutputLow = OutputLow;
+        _combinedFactory.Opacity = Opacity;
+        
+        using var shader = _combinedFactory.GenerateOutputShader();
+        var size = new SKRect(0, 0, _mainImage.Width, _mainImage.Height);
+        using var data = await Converter.Convert(size, shader!);
+        if (!IsValidSkiaObject(data))
+            throw new SkiaObjectInvalidStateException("Failed to convert output shader to an image");
+        
+        var memoryStream = new MemoryStream((int)data!.Size);
+        await using var dataStream = data.AsStream();
+        await dataStream.CopyToAsync(memoryStream);
+        PngPatcher.PatchGamma(memoryStream, Gamma);
+        
+        return memoryStream;
+    }
 
     private static bool IsValidSkiaObject(SKObject? obj) => obj is not null && obj.Handle != IntPtr.Zero;
     
     private class SkiaObjectInvalidStateException(string message) : Exception(message);
+
+    private class ConverterIsMissingException() : Exception($"{nameof(Converter)} is null");
 }

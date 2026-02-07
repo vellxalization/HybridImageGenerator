@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -41,30 +40,30 @@ public partial class MainViewModel : ViewModelBase {
     private Size _hiddenScale;
     
     private ImageFileService _fileService;
-    private ImageEditor _imageEditor;
+    public ImageEditor ImageEditor { get; init; }
 
-    partial void OnOutputLowChanged(byte value) => _imageEditor.OutputLow = value;
+    partial void OnOutputLowChanged(byte value) => ImageEditor.OutputLow = value;
 
-    partial void OnOpacityChanged(byte value) => _imageEditor.Opacity = value;
+    partial void OnOpacityChanged(byte value) => ImageEditor.Opacity = value;
 
-    partial void OnGammaChanged(float value) => _imageEditor.Gamma = value;
+    partial void OnGammaChanged(float value) => ImageEditor.Gamma = value;
 
-    partial void OnControlsBoundsChanged(Rect value) => _imageEditor.SetRenderSize(value.Size);
+    partial void OnControlsBoundsChanged(Rect value) => ImageEditor.SetRenderSize(value.Size);
 
     public MainViewModel(ImageFileService fileService, ImageEditor editor) {
         _fileService = fileService;
-        _imageEditor = editor;
+        ImageEditor = editor;
         
-        _imageEditor.MainShaderChanged += (_, shader) => MainShader = shader;
-        _imageEditor.HiddenShaderChanged += (_, shader) => HiddenShader = shader;
-        _imageEditor.OutputLowShaderChanged += (_, shader) => OutputLowShader = shader;
-        _imageEditor.NegativeShaderChanged += (_, shader) => NegativeShader = shader;
-        _imageEditor.OverlayShaderChanged += (_, shader) => OverlayShader = shader;
-        _imageEditor.StitchShaderChanged += (_, shader) => StitchShader = shader;
-        _imageEditor.GammaShaderChanged += (_, shader) => GammaShader = shader;
+        ImageEditor.MainShaderChanged += (_, shader) => MainShader = shader;
+        ImageEditor.HiddenShaderChanged += (_, shader) => HiddenShader = shader;
+        ImageEditor.OutputLowShaderChanged += (_, shader) => OutputLowShader = shader;
+        ImageEditor.NegativeShaderChanged += (_, shader) => NegativeShader = shader;
+        ImageEditor.OverlayShaderChanged += (_, shader) => OverlayShader = shader;
+        ImageEditor.StitchShaderChanged += (_, shader) => StitchShader = shader;
+        ImageEditor.GammaShaderChanged += (_, shader) => GammaShader = shader;
 
-        _imageEditor.MainScaleChanged += (_, size) => MainScale = size;
-        _imageEditor.HiddenScaleChanged += (_, size) => HiddenScale = size;
+        ImageEditor.MainScaleChanged += (_, size) => MainScale = size;
+        ImageEditor.HiddenScaleChanged += (_, size) => HiddenScale = size;
     }
     
     [RelayCommand]
@@ -76,7 +75,7 @@ public partial class MainViewModel : ViewModelBase {
         await file.CopyToAsync(memoryStream);
         memoryStream.Position = 0;
         var image = SKImage.FromEncodedData(memoryStream);
-        _imageEditor.TrySetMainImage(image, out _);
+        ImageEditor.TrySetMainImage(image, out _);
     }
     
     [RelayCommand]
@@ -88,14 +87,16 @@ public partial class MainViewModel : ViewModelBase {
         await file.CopyToAsync(memoryStream);
         memoryStream.Position = 0;
         var image = SKImage.FromEncodedData(memoryStream);
-        _imageEditor.TrySetHiddenImage(image, out _);
+        ImageEditor.TrySetHiddenImage(image, out _);
     }
     
     [RelayCommand]
     private async Task SaveImage() {
+        using var patchedImage = await ImageEditor.Save();
         await using Stream? file = await _fileService.SelectSaveFile();
-        if (file is null) return;
-        
-        Console.WriteLine(file.Length);
+        if (file is null || !file.CanWrite) return;
+
+        patchedImage.Position = 0;
+        await patchedImage.CopyToAsync(file);
     }
 }
