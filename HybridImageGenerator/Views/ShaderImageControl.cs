@@ -8,19 +8,30 @@ using SkiaSharp;
 namespace HybridImageGenerator.Views;
 
 public class ShaderImageControl : Control {
-    public Size ImageSize { get; set; }
+    public static readonly StyledProperty<Size> ImageSizeProperty =
+        AvaloniaProperty.Register<ShaderImageControl, Size>(nameof(ImageSize));
+
+    public Size ImageSize {
+        get => GetValue(ImageSizeProperty);
+        set => SetValue(ImageSizeProperty, value);
+    }
+    
+    public static readonly StyledProperty<SKShader?> InputShaderProperty =
+        AvaloniaProperty.Register<ShaderImageControl, SKShader?>(nameof(InputShader));
 
     public SKShader? InputShader {
-        get => _shader;
-        set {
-            _shader = value;
-            _paint.Shader = _shader;
-        }
+        get => GetValue(InputShaderProperty);
+        set => SetValue(InputShaderProperty, value);
     }
-
-    private SKShader? _shader;
     
     private readonly SKPaint _paint = new SKPaint();
+
+    static ShaderImageControl() {
+        InputShaderProperty.Changed.AddClassHandler<ShaderImageControl>(
+            (x, e) => x._paint.Shader = e.GetNewValue<SKShader?>());
+        AffectsRender<ShaderImageControl>(InputShaderProperty);
+        AffectsRender<ShaderImageControl>(ImageSizeProperty);
+    }
     
     public override void Render(DrawingContext context) {
         if (InputShader is null || InputShader.Handle == IntPtr.Zero) return;

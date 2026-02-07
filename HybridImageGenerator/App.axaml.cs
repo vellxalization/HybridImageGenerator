@@ -18,20 +18,18 @@ public partial class App : Application {
 
     public override void OnFrameworkInitializationCompleted() {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
-            // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
-            // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             DisableAvaloniaDataAnnotationValidation();
             var mainWindow = new MainWindow();
             IStorageProvider StorageProviderGetter() => mainWindow.StorageProvider;
             var imageFileService = new ImageFileService(StorageProviderGetter);
-            mainWindow.DataContext = new MainViewModel(imageFileService);
+            mainWindow.DataContext = new MainViewModel(imageFileService, new ImageEditor());
             desktop.MainWindow = mainWindow;
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform) {
             var mainView = new MainView();
             IStorageProvider StorageProviderGetter() => TopLevel.GetTopLevel(mainView)!.StorageProvider;
             var imageFileService = new ImageFileService(StorageProviderGetter);
-            mainView.DataContext = new MainViewModel(imageFileService);
+            mainView.DataContext = new MainViewModel(imageFileService, new ImageEditor());
             singleViewPlatform.MainView = mainView;
         }
 
