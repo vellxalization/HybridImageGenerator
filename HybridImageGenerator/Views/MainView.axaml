@@ -31,12 +31,12 @@
       
       <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
         <Button HorizontalAlignment="Center" Command="{Binding LoadMainImageCommand}" Content="Upload main"/>
-        <Button HorizontalAlignment="Center" Name="ClearMainButton" Content="X" IsEnabled="false"/>
+        <Button HorizontalAlignment="Center" Command="{Binding RemoveMainImageCommand}" Content="X"/>
       </StackPanel>
       
       <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
         <Button HorizontalAlignment="Center" Command="{Binding LoadHiddenImageCommand}" Content="Upload hidden"/>
-        <Button HorizontalAlignment="Center" Name="ClearHiddenButton" Content="X" IsEnabled="false"/>
+        <Button HorizontalAlignment="Center" Command="{Binding RemoveHiddenImageCommand}" Content="X"/>
       </StackPanel>
       
       <views:ShaderImageControl Name="MainImageControl" InputShader="{Binding MainShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="1" Grid.Column="0"/>
@@ -62,6 +62,6 @@
         <Slider x:Name="GammaSlider" Value="{Binding Gamma}" Minimum="0.01" Maximum="0.45455" TickFrequency="0.002" IsSnapToTickEnabled="True"/>
       </StackPanel>
      
-      <Button HorizontalAlignment="Center" Command="{Binding SaveImageCommand}" IsEnabled="True" Name="SaveButton" Content="Save"/>
+      <Button HorizontalAlignment="Center" Command="{Binding SaveImageCommand}" Content="Save"/>
   </Grid>
 </UserControl>

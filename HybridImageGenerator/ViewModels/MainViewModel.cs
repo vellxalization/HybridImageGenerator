@@ -14,9 +14,11 @@ public partial class MainViewModel : ViewModelBase {
     
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveImageCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RemoveMainImageCommand))]
     private SKShader? _mainShader;
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveImageCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RemoveHiddenImageCommand))]
     private SKShader? _hiddenShader;
     [ObservableProperty]
     private SKShader? _outputLowShader;
@@ -103,4 +105,18 @@ public partial class MainViewModel : ViewModelBase {
     }
 
     private bool CanSave() => MainShader is not null && HiddenShader is not null;
+
+    [RelayCommand(CanExecute=nameof(CanRemoveMainImage))]
+    private void RemoveMainImage() {
+        ImageEditor.RemoveMainImage();
+    }
+
+    private bool CanRemoveMainImage() => MainShader is not null;
+    
+    [RelayCommand(CanExecute=nameof(CanRemoveHiddenImage))]
+    private void RemoveHiddenImage() {
+        ImageEditor.RemoveHiddenImage();
+    }
+    
+    private bool CanRemoveHiddenImage() => HiddenShader is not null;
 }
