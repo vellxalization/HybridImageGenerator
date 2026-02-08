@@ -22,14 +22,16 @@ public partial class App : Application {
             var mainWindow = new MainWindow();
             IStorageProvider StorageProviderGetter() => mainWindow.StorageProvider;
             var imageFileService = new ImageFileService(StorageProviderGetter);
-            mainWindow.DataContext = new MainViewModel(imageFileService, new ImageEditor());
+            var editorViewModel = new EditorViewModel(imageFileService, new ImageEditor());
+            mainWindow.DataContext = new MainViewModel(editorViewModel);
             desktop.MainWindow = mainWindow;
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform) {
             var mainView = new MainView();
             IStorageProvider StorageProviderGetter() => TopLevel.GetTopLevel(mainView)!.StorageProvider;
             var imageFileService = new ImageFileService(StorageProviderGetter);
-            mainView.DataContext = new MainViewModel(imageFileService, new ImageEditor());
+            var editorViewModel = new EditorViewModel(imageFileService, new ImageEditor());
+            mainView.DataContext = new MainViewModel(editorViewModel);
             singleViewPlatform.MainView = mainView;
         }
 

@@ -14,54 +14,6 @@
     <vm:MainViewModel />
   </Design.DataContext>
     <Grid>
-    <views:SaveImageControl Name="SaveControl" Grid.Row="1" Grid.Column="0"/>
-    <Grid.RowDefinitions>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="*"/>
-    </Grid.RowDefinitions>
-      
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="*"/>
-      <ColumnDefinition Width="*"/>
-      <ColumnDefinition Width="*"/>
-    </Grid.ColumnDefinitions>
-      
-      <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
-        <Button HorizontalAlignment="Center" Command="{Binding LoadMainImageCommand}" Content="Upload main"/>
-        <Button HorizontalAlignment="Center" Command="{Binding RemoveMainImageCommand}" Content="X"/>
-      </StackPanel>
-      
-      <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
-        <Button HorizontalAlignment="Center" Command="{Binding LoadHiddenImageCommand}" Content="Upload hidden"/>
-        <Button HorizontalAlignment="Center" Command="{Binding RemoveHiddenImageCommand}" Content="X"/>
-      </StackPanel>
-      
-      <views:ShaderImageControl Name="MainImageControl" InputShader="{Binding MainShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="1" Grid.Column="0"/>
-      <views:ShaderImageControl InputShader="{Binding HiddenShader, Mode=OneWay}" ImageSize="{Binding HiddenScale}" Grid.Row="1" Grid.Column="1"/>
-      <views:ShaderImageControl InputShader="{Binding OutputLowShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="2" Grid.Column="0"/>
-      <views:ShaderImageControl InputShader="{Binding NegativeShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="2" Grid.Column="1"/>
-      <views:ShaderImageControl InputShader="{Binding OverlayShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="3" Grid.Column="0"/>
-      <views:ShaderImageControl InputShader="{Binding StitchShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="4" Grid.Column="0"/>
-      <views:ShaderImageControl InputShader="{Binding GammaShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="4" Grid.Column="1"/>
-    
-      <StackPanel Grid.Row="2" Grid.Column="2">
-        <TextBlock Text="Output low" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
-        <Slider x:Name="OutputLowSlider" Value="{Binding OutputLow}" Minimum="0" Maximum="255" TickFrequency="1" IsSnapToTickEnabled="True"/>
-      </StackPanel>
-      
-      <StackPanel Grid.Row="3" Grid.Column="2">
-        <TextBlock Text="Opacity" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
-        <Slider x:Name="OpacitySlider" Value="{Binding Opacity}" Minimum="0" Maximum="255" TickFrequency="1" IsSnapToTickEnabled="True"/>
-      </StackPanel>
-      
-      <StackPanel Grid.Row="4" Grid.Column="2">
-        <TextBlock Text="Gamma" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
-        <Slider x:Name="GammaSlider" Value="{Binding Gamma}" Minimum="0.01" Maximum="0.45455" TickFrequency="0.002" IsSnapToTickEnabled="True"/>
-      </StackPanel>
-     
-      <Button HorizontalAlignment="Center" Command="{Binding SaveImageCommand}" Content="Save"/>
-  </Grid>
+        <views:EditorView DataContext="{Binding EditorViewModel}"></views:EditorView>
+    </Grid>
 </UserControl>
