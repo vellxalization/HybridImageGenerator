@@ -25,7 +25,7 @@ public partial class App : Application {
             IStorageProvider StorageProviderGetter() => mainWindow.StorageProvider;
             var imageFileService = new ImageFileService(StorageProviderGetter);
             var editorViewModel = new EditorViewModel(imageFileService, new ImageEditor(), errorDispatcher);
-            mainWindow.DataContext = new MainViewModel(editorViewModel, new ErrorViewModel(errorDispatcher));
+            mainWindow.DataContext = new MainViewModel(editorViewModel, new DesktopErrorViewModel(errorDispatcher));
             desktop.MainWindow = mainWindow;
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform) {
@@ -33,7 +33,7 @@ public partial class App : Application {
             IStorageProvider StorageProviderGetter() => TopLevel.GetTopLevel(mainView)!.StorageProvider;
             var imageFileService = new ImageFileService(StorageProviderGetter);
             var editorViewModel = new EditorViewModel(imageFileService, new ImageEditor(), errorDispatcher);
-            mainView.DataContext = new MainViewModel(editorViewModel, new ErrorViewModel(errorDispatcher));
+            mainView.DataContext = new MainViewModel(editorViewModel, new WebErrorViewModel(errorDispatcher));
             singleViewPlatform.MainView = mainView;
         }
 

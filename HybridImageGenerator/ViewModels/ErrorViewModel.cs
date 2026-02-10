@@ -6,9 +6,9 @@ using HybridImageGenerator.Models;
 
 namespace HybridImageGenerator.ViewModels;
 
-public partial class ErrorViewModel() : ViewModelBase {
+public abstract partial class ErrorViewModel : ViewModelBase {
     [ObservableProperty]
-    private string _message;
+    private string _message = "";
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ShowStackTraceSwitchCommand))]
     private string? _stackTrace;
@@ -22,10 +22,10 @@ public partial class ErrorViewModel() : ViewModelBase {
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ContinueCommand))]
     private bool _isFatalError;
+    private TaskCompletionSource? _currentErrorTsc;
     
-    private TaskCompletionSource _currentErrorTsc;
-    
-    public ErrorViewModel(ErrorDispatcher errorDispatcher) : this() {
+    protected ErrorViewModel(ErrorDispatcher errorDispatcher, string criticalButtonText) {
+        _criticalButtonText = criticalButtonText;
         errorDispatcher.ErrorOccured += HandleIncomingError;
     }
 
@@ -37,7 +37,6 @@ public partial class ErrorViewModel() : ViewModelBase {
         IsFatalError = details.IsFatal;
         Message = details.Message;
         StackTrace = details.StackTrace;
-        CriticalButtonText = "Terminate";
     }
 
     [RelayCommand(CanExecute=nameof(CanShowStackTrace))]
@@ -47,15 +46,12 @@ public partial class ErrorViewModel() : ViewModelBase {
 
     [RelayCommand(CanExecute=nameof(CanContinue))]
     private void Continue() {
-        _currentErrorTsc.SetResult();
+        _currentErrorTsc?.SetResult();
         IsVisible = false;
     }
 
     private bool CanContinue() => !IsFatalError;
 
     [RelayCommand]
-    private void Terminate() {
-        _currentErrorTsc.SetResult();
-        Environment.Exit(0);
-    }
+    protected abstract void Critical();
 }
