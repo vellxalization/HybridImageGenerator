@@ -2,14 +2,9 @@
 
 namespace HybridImageGenerator.ViewModels;
 
-public partial class MainViewModel() : ViewModelBase {
+public partial class MainViewModel(EditorViewModel editorViewModel, ErrorViewModel errorViewModel) : ViewModelBase {
     [ObservableProperty]
-    private EditorViewModel _editorViewModel;
+    private EditorViewModel _editorViewModel = editorViewModel;
     [ObservableProperty]
-    private ErrorViewModel _errorViewModel;
-    
-    public MainViewModel(EditorViewModel editorViewModel, ErrorViewModel errorViewModel) : this() {
-        _editorViewModel = editorViewModel;
-        _errorViewModel = errorViewModel; 
-    }
+    private ErrorViewModel _errorViewModel = errorViewModel;
 }
