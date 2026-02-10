@@ -1,0 +1,20 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:HybridImageGenerator.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="HybridImageGenerator.Views.ErrorView"
+             x:DataType="viewModels:ErrorViewModel"
+             >
+    
+    <Grid RowDefinitions="Auto, Auto, Auto" Margin="20">
+        <TextBlock Grid.Row="0" TextWrapping="Wrap" Text="{Binding Message}"/>
+        <Grid Grid.Row ="1" ColumnDefinitions="2*, *, *" Margin="0, 20, 0, 10">
+            <Button Grid.Column="0" MinWidth="75" HorizontalContentAlignment="Center" Command="{Binding ShowStackTraceSwitchCommand}">Details</Button>
+            <Button Grid.Column="1" MinWidth="125" HorizontalContentAlignment="Center" Command="{Binding ContinueCommand}">Continue</Button>
+            <Button Grid.Column="2" MinWidth="125" HorizontalContentAlignment="Center" Command="{Binding TerminateCommand}" Content="{Binding CriticalButtonText}"></Button>
+        </Grid>
+        <TextBox Grid.Row="2" IsVisible="{Binding StackTraceVisible}" Text="{Binding StackTrace}"></TextBox>
+    </Grid>
+</UserControl>

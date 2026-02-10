@@ -10,6 +10,8 @@ using SkiaSharp;
 namespace HybridImageGenerator.Models;
 
 public class ImageEditor {
+    public bool Initialized { get; private set; }
+    
     private const int MinSize = 4;
     
     private SKImage? _mainImage;
@@ -38,9 +40,18 @@ public class ImageEditor {
     // all images are scaled to fit controls and all controls must be the same size
     private Size _renderSize;
 
+    public void Initialize() {
+        if (Initialized) return;
+        
+        CreatePipeline();
+        Initialized = true;
+    }
+    
     public byte OutputLow {
         get;
         set {
+            EnsureInitialized();
+            
             field = value;
             _outputLowNode.Factory.OutputLow = value;
             _outputLowNode.SendUpdate();
@@ -50,6 +61,8 @@ public class ImageEditor {
     public byte Opacity {
         get;
         set {
+            EnsureInitialized();
+            
             field = value;
             _overlayNode.Factory.Opacity = value;
             _overlayNode.SendUpdate();
@@ -59,18 +72,14 @@ public class ImageEditor {
     public float Gamma {
         get;
         set {
+            EnsureInitialized();
+            
             field = value;
             _gammaNode.Factory.Gamma = value;
             _gammaNode.SendUpdate();
         }
     }
-
-    public ImageEditor() 
-    {
-        // _converter = converter;
-        CreatePipeline();
-    }
-
+    
     private void CreatePipeline() {
         _outputLowNode = new PipelineNode<OutputLowFactory>(new OutputLowFactory());
         _negativeNode = new PipelineNode<NegativeFactory>(new NegativeFactory());
@@ -102,16 +111,19 @@ public class ImageEditor {
     }
 
     public void SetRenderSize(Size newSize) {
+        
         if (newSize == _renderSize) return;
         
         _renderSize = newSize;
         if (_mainImage is not null) {
+            EnsureInitialized();
             var scaled = ScaleImage(_mainImage, newSize);
             MainScaleChanged?.Invoke(this, scaled.shaderSize);
             MainShaderChanged?.Invoke(this, scaled.shader);
         }
         
         if (_hiddenImage is not null) {
+            EnsureInitialized();
             var scaled = ScaleImage(_hiddenImage, newSize);
             HiddenScaleChanged?.Invoke(this, scaled.shaderSize);
             HiddenShaderChanged?.Invoke(this, scaled.shader);
@@ -119,6 +131,8 @@ public class ImageEditor {
     }
     
     public bool TrySetMainImage(SKImage image, out string? error) {
+        EnsureInitialized();
+        
         if (!IsValidSkiaObject(image)) 
             throw new SkiaObjectInvalidStateException("Input image is invalid");
         
@@ -140,6 +154,8 @@ public class ImageEditor {
     }
     
     public bool TrySetHiddenImage(SKImage image, out string? error) {
+        EnsureInitialized();
+        
         if (!IsValidSkiaObject(image)) 
             throw new SkiaObjectInvalidStateException("Input image is invalid");
 
@@ -161,6 +177,8 @@ public class ImageEditor {
     }
     
     public void RemoveMainImage() {
+        EnsureInitialized();
+        
         if (_mainImage is null) return;
         
         MainShaderChanged?.Invoke(this, null);
@@ -169,6 +187,8 @@ public class ImageEditor {
     }
     
     public void RemoveHiddenImage() {
+        EnsureInitialized();
+        
         if (_hiddenImage is null) return;
         
         HiddenShaderChanged?.Invoke(this, null);
@@ -200,6 +220,8 @@ public class ImageEditor {
     }
     
     public async Task<MemoryStream> Save() {
+        EnsureInitialized();
+        
         if (Converter is null)
             throw new ConverterIsMissingException();
         
@@ -243,8 +265,15 @@ public class ImageEditor {
     }
 
     private static bool IsValidSkiaObject(SKObject? obj) => obj is not null && obj.Handle != IntPtr.Zero;
+
+    private void EnsureInitialized() {
+        if (!Initialized)
+            throw new EditorNotInitialized();
+    }
+    
+    public class EditorNotInitialized() : Exception("The editor is not initialized");
+    
+    public class ConverterIsMissingException() : Exception($"{nameof(Converter)} is null");
     
     private class SkiaObjectInvalidStateException(string message) : Exception(message);
-
-    private class ConverterIsMissingException() : Exception($"{nameof(Converter)} is null");
 }

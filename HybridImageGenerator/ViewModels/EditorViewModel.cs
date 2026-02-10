@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,7 +10,7 @@ using SkiaSharp;
 namespace HybridImageGenerator.ViewModels;
 
 public partial class EditorViewModel : ViewModelBase {
-        [ObservableProperty]
+    [ObservableProperty]
     private Rect _controlsBounds;
     
     [ObservableProperty]
@@ -43,8 +44,9 @@ public partial class EditorViewModel : ViewModelBase {
     [ObservableProperty]
     private Size _hiddenScale;
     
-    private ImageFileService _fileService;
     public ImageEditor ImageEditor { get; init; }
+    private ImageFileService _fileService;
+    private ErrorDispatcher _errorDispatcher;
 
     partial void OnOutputLowChanged(byte value) => ImageEditor.OutputLow = value;
 
@@ -54,9 +56,10 @@ public partial class EditorViewModel : ViewModelBase {
 
     partial void OnControlsBoundsChanged(Rect value) => ImageEditor.SetRenderSize(value.Size);
 
-    public EditorViewModel(ImageFileService fileService, ImageEditor editor) {
-        _fileService = fileService;
+    public EditorViewModel(ImageFileService fileService, ImageEditor editor, ErrorDispatcher errorDispatcher) {
         ImageEditor = editor;
+        _fileService = fileService;
+        _errorDispatcher = errorDispatcher;
         
         ImageEditor.MainShaderChanged += (_, shader) => MainShader = shader;
         ImageEditor.HiddenShaderChanged += (_, shader) => HiddenShader = shader;
@@ -72,36 +75,94 @@ public partial class EditorViewModel : ViewModelBase {
     
     [RelayCommand]
     private async Task LoadMainImage() {
-        await using Stream? file = await _fileService.SelectOpenFile();
-        if (file is null) return;
+        try {
+            // TODO: i don't like this. I need to rewrite this
+            if (!ImageEditor.Initialized)
+                ImageEditor.Initialize();
+        }
+        catch (Exception ex) {
+            var details = new ErrorDetails(true, ex.Message, ex.StackTrace);
+            await _errorDispatcher.Invoke(details);
+            return;
+        }
         
-        using var memoryStream = new MemoryStream((int)file.Length);
-        await file.CopyToAsync(memoryStream);
-        memoryStream.Position = 0;
-        var image = SKImage.FromEncodedData(memoryStream);
-        ImageEditor.TrySetMainImage(image, out _);
+        try {
+            await _errorDispatcher.Invoke(new ErrorDetails(true, "Loading"));
+            await using Stream? file = await _fileService.SelectOpenFile();
+            if (file is null) return;
+
+            using var memoryStream = new MemoryStream((int)file.Length);
+            await file.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+            var image = SKImage.FromEncodedData(memoryStream);
+            if (!ImageEditor.TrySetMainImage(image, out string? error)) {
+                var details = new ErrorDetails(false, error!);
+                await _errorDispatcher.Invoke(details);
+            }
+        }
+        catch (Exception ex) {
+            var details = new ErrorDetails(false, ex.Message, ex.StackTrace);
+            await _errorDispatcher.Invoke(details);
+        }
     }
     
     [RelayCommand]
     private async Task LoadHiddenImage() {
-        await using Stream? file = await _fileService.SelectOpenFile();
-        if (file is null) return;
+        try {
+            if (!ImageEditor.Initialized)
+                ImageEditor.Initialize();
+        }
+        catch (Exception ex) {
+            var details = new ErrorDetails(true, ex.Message, ex.StackTrace);
+            await _errorDispatcher.Invoke(details);
+            return;
+        }
         
-        using var memoryStream = new MemoryStream((int)file.Length);
-        await file.CopyToAsync(memoryStream);
-        memoryStream.Position = 0;
-        var image = SKImage.FromEncodedData(memoryStream);
-        ImageEditor.TrySetHiddenImage(image, out _);
+        try {
+            await using Stream? file = await _fileService.SelectOpenFile();
+            if (file is null) return;
+
+            using var memoryStream = new MemoryStream((int)file.Length);
+            await file.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+            var image = SKImage.FromEncodedData(memoryStream);
+            if (!ImageEditor.TrySetHiddenImage(image, out string? error)) {
+                var details = new ErrorDetails(false, error!);
+                await _errorDispatcher.Invoke(details);
+            }
+        }
+        catch (Exception ex) {
+            var isFatal = ex is ImageEditor.EditorNotInitialized;
+            var details = new ErrorDetails(isFatal, ex.Message, ex.StackTrace);
+            await _errorDispatcher.Invoke(details);
+        }
     }
     
     [RelayCommand(CanExecute=nameof(CanSave))]
     private async Task SaveImage() {
-        using var patchedImage = await ImageEditor.Save();
-        await using Stream? file = await _fileService.SelectSaveFile();
-        if (file is null || !file.CanWrite) return;
+        try {
+            if (!ImageEditor.Initialized)
+                ImageEditor.Initialize();
+        }
+        catch (Exception ex) {
+            var details = new ErrorDetails(true, ex.Message, ex.StackTrace);
+            await _errorDispatcher.Invoke(details);
+            return;
+        }
+        
+        try {
+            using var patchedImage = await ImageEditor.Save();
+            await using Stream? file = await _fileService.SelectSaveFile();
+            if (file is null || !file.CanWrite) return;
 
-        patchedImage.Position = 0;
-        await patchedImage.CopyToAsync(file);
+            patchedImage.Position = 0;
+            await patchedImage.CopyToAsync(file);
+        }
+        catch (Exception ex) {
+            var isFatal = ex is ImageEditor.ConverterIsMissingException;
+            var details = new ErrorDetails(isFatal, ex.Message, ex.StackTrace);
+            await _errorDispatcher.Invoke(details);
+        }
     }
 
     private bool CanSave() => MainShader is not null && HiddenShader is not null;

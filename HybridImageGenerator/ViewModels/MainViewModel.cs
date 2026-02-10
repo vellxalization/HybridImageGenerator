@@ -1,14 +1,15 @@
-﻿using System.IO;
-using System.Threading.Tasks;
-using Avalonia;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using HybridImageGenerator.Models;
-using SkiaSharp;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace HybridImageGenerator.ViewModels;
 
-public partial class MainViewModel(EditorViewModel editorViewModel) : ViewModelBase {
+public partial class MainViewModel() : ViewModelBase {
     [ObservableProperty]
-    private EditorViewModel? _editorViewModel = editorViewModel;
+    private EditorViewModel _editorViewModel;
+    [ObservableProperty]
+    private ErrorViewModel _errorViewModel;
+    
+    public MainViewModel(EditorViewModel editorViewModel, ErrorViewModel errorViewModel) : this() {
+        _editorViewModel = editorViewModel;
+        _errorViewModel = errorViewModel; 
+    }
 }
