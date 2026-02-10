@@ -87,7 +87,6 @@ public partial class EditorViewModel : ViewModelBase {
         }
         
         try {
-            await _errorDispatcher.Invoke(new ErrorDetails(true, "Loading"));
             await using Stream? file = await _fileService.SelectOpenFile();
             if (file is null) return;
 
