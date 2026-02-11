@@ -18,13 +18,15 @@ public partial class App : Application {
 
     public override void OnFrameworkInitializationCompleted() {
         var errorDispatcher = new ErrorDispatcher();
+        var editor = new ImageEditor(new EditedImageSaver());
+        editor.Initialize();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
             DisableAvaloniaDataAnnotationValidation();
             
             var mainWindow = new MainWindow();
             IStorageProvider StorageProviderGetter() => mainWindow.StorageProvider;
             var imageFileService = new ImageFileService(StorageProviderGetter);
-            var editorViewModel = new EditorViewModel(imageFileService, new ImageEditor(), errorDispatcher);
+            var editorViewModel = new EditorViewModel(imageFileService, editor, errorDispatcher);
             mainWindow.DataContext = new MainViewModel(editorViewModel, new DesktopErrorViewModel(errorDispatcher));
             desktop.MainWindow = mainWindow;
         }
@@ -32,7 +34,7 @@ public partial class App : Application {
             var mainView = new MainView();
             IStorageProvider StorageProviderGetter() => TopLevel.GetTopLevel(mainView)!.StorageProvider;
             var imageFileService = new ImageFileService(StorageProviderGetter);
-            var editorViewModel = new EditorViewModel(imageFileService, new ImageEditor(), errorDispatcher);
+            var editorViewModel = new EditorViewModel(imageFileService, editor, errorDispatcher);
             mainView.DataContext = new MainViewModel(editorViewModel, new WebErrorViewModel(errorDispatcher));
             singleViewPlatform.MainView = mainView;
         }

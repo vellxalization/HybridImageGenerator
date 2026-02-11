@@ -158,8 +158,7 @@ public partial class EditorViewModel : ViewModelBase {
             await patchedImage.CopyToAsync(file);
         }
         catch (Exception ex) {
-            var isFatal = ex is ImageEditor.ConverterIsMissingException;
-            var details = new ErrorDetails(isFatal, ex.Message, ex.StackTrace);
+            var details = new ErrorDetails(false, ex.Message, ex.StackTrace);
             await _errorDispatcher.Invoke(details);
         }
     }

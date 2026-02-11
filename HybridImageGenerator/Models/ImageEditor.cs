@@ -9,15 +9,14 @@ using SkiaSharp;
 
 namespace HybridImageGenerator.Models;
 
-public class ImageEditor {
+public class ImageEditor(EditedImageSaver saver) {
     public bool Initialized { get; private set; }
     
     private const int MinSize = 4;
     
     private SKImage? _mainImage;
     private SKImage? _hiddenImage;
-
-    public ShaderToImageConverter? Converter { get; set; }
+    
 
     public event EventHandler<SKShader?>? MainShaderChanged; 
     public event EventHandler<SKShader?>? HiddenShaderChanged; 
@@ -34,8 +33,6 @@ public class ImageEditor {
     private PipelineNode<OverlayFactory> _overlayNode;
     private PipelineNode<StitchingFactory> _stitchNode;
     private PipelineNode<GammaFactory> _gammaNode;
-
-    private readonly CombinedFactory _combinedFactory = new();
     
     // all images are scaled to fit controls and all controls must be the same size
     private Size _renderSize;
@@ -220,39 +217,17 @@ public class ImageEditor {
     }
     
     public async Task<MemoryStream> Save() {
-        EnsureInitialized();
-        
-        if (Converter is null)
-            throw new ConverterIsMissingException();
-        
         if (!IsValidSkiaObject(_mainImage))
             throw new SkiaObjectInvalidStateException("Main image is invalid");
         
         if (!IsValidSkiaObject(_hiddenImage))
             throw new SkiaObjectInvalidStateException("Hidden image is invalid");
+
+        SKBitmap mainBitmap = saver.ConvertImageToUnpremulRgba8888Bitmap(_mainImage!);
+        SKBitmap hiddenBitmap = saver.ConvertImageToUnpremulRgba8888Bitmap(_hiddenImage!);
+        SKBitmap saved = saver.Save(mainBitmap, hiddenBitmap, OutputLow, Opacity);;
+        using var data = saved.Encode(SKEncodedImageFormat.Png, 100);
         
-        var inputShader = _mainImage!.ToShader();
-        if (!IsValidSkiaObject(inputShader)) {
-            inputShader?.Dispose();
-            throw new SkiaObjectInvalidStateException("Failed to generate a shader from main image");
-        }
-        
-        var overlayShader = _hiddenImage!.ToShader();
-        if (!IsValidSkiaObject(overlayShader)) {
-            overlayShader?.Dispose();
-            throw new SkiaObjectInvalidStateException("Failed to generate a shader from hidden image");
-        }
-        
-        _combinedFactory.InputShader?.Dispose();
-        _combinedFactory.OverlayShader?.Dispose();
-        _combinedFactory.InputShader = inputShader;
-        _combinedFactory.OverlayShader = overlayShader;
-        _combinedFactory.OutputLow = OutputLow;
-        _combinedFactory.Opacity = Opacity;
-        
-        using var shader = _combinedFactory.GenerateOutputShader();
-        var size = new SKRect(0, 0, _mainImage.Width, _mainImage.Height);
-        using var data = await Converter.Convert(size, shader!);
         if (!IsValidSkiaObject(data))
             throw new SkiaObjectInvalidStateException("Failed to convert output shader to an image");
         
@@ -273,7 +248,6 @@ public class ImageEditor {
     
     public class EditorNotInitialized() : Exception("The editor is not initialized");
     
-    public class ConverterIsMissingException() : Exception($"{nameof(Converter)} is null");
     
     private class SkiaObjectInvalidStateException(string message) : Exception(message);
 }

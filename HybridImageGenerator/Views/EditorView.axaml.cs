@@ -16,12 +16,6 @@ public partial class EditorView : UserControl {
             }
         }));
         
-        SaveControl.Loaded += (_, _) => {
-            if (DataContext is EditorViewModel vm) {
-                // TODO: this kinda breaks MVVM model
-                vm.ImageEditor.Converter = new ShaderToImageConverter(SaveControl);
-            }
-        };
         
         Unloaded += (_, _) => subscription.Dispose();
     }
