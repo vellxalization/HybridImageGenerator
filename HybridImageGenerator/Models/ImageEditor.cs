@@ -216,20 +216,20 @@ public class ImageEditor(EditedImageSaver saver) {
         return SKMatrix.CreateScaleTranslation(scale, scale, xTranslation, yTranslation);
     }
     
-    public async Task<MemoryStream> Save() {
+    public async Task<MemoryStream> SaveAsync() {
         if (!IsValidSkiaObject(_mainImage))
             throw new SkiaObjectInvalidStateException("Main image is invalid");
         
         if (!IsValidSkiaObject(_hiddenImage))
             throw new SkiaObjectInvalidStateException("Hidden image is invalid");
 
-        SKBitmap mainBitmap = saver.ConvertImageToUnpremulRgba8888Bitmap(_mainImage!);
-        SKBitmap hiddenBitmap = saver.ConvertImageToUnpremulRgba8888Bitmap(_hiddenImage!);
-        SKBitmap saved = saver.Save(mainBitmap, hiddenBitmap, OutputLow, Opacity);;
-        using var data = saved.Encode(SKEncodedImageFormat.Png, 100);
+        using SKBitmap mainBitmap = saver.ConvertImageToUnpremulRgba8888Bitmap(_mainImage!);
+        using SKBitmap hiddenBitmap = saver.ConvertImageToUnpremulRgba8888Bitmap(_hiddenImage!);
+        using SKBitmap saved = await saver.ApplyEffectsAndSaveAsync(mainBitmap, hiddenBitmap, OutputLow, Opacity);
+        using SKData? data = saved.Encode(SKEncodedImageFormat.Png, 100);
         
         if (!IsValidSkiaObject(data))
-            throw new SkiaObjectInvalidStateException("Failed to convert output shader to an image");
+            throw new SkiaObjectInvalidStateException("Failed to save final image");
         
         var memoryStream = new MemoryStream((int)data!.Size);
         await using var dataStream = data.AsStream();

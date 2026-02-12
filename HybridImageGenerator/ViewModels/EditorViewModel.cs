@@ -150,7 +150,7 @@ public partial class EditorViewModel : ViewModelBase {
         }
         
         try {
-            using var patchedImage = await ImageEditor.Save();
+            using var patchedImage = await ImageEditor.SaveAsync();
             await using Stream? file = await _fileService.SelectSaveFile();
             if (file is null || !file.CanWrite) return;
 

@@ -8,7 +8,7 @@ namespace HybridImageGenerator.Models;
 public class EditedImageSaver {
     private const int UnpremulRgba8888BytesPerPixel = 4;
     
-    public SKBitmap Save(SKBitmap mainImage, SKBitmap hiddenImage, byte outputLow, byte opacity) {
+    public async Task<SKBitmap> ApplyEffectsAndSaveAsync(SKBitmap mainImage, SKBitmap hiddenImage, byte outputLow, byte opacity) {
         if (!IsValidBitmap(mainImage))
             throw new InvalidImageFormatException("Main image must have unpremultiplied alpha and RGBA8888 color type");
         
@@ -19,15 +19,15 @@ public class EditedImageSaver {
         var result = new SKBitmap(info);
         
         mainImage.CopyTo(result);
-        ProcessImages(result, hiddenImage, outputLow, (float)opacity / 255);
+        await Task.Run(() => ProcessImages(result, hiddenImage, outputLow, opacity));
         return result;
     }
 
-    private static unsafe void ProcessImages(SKBitmap mainImage, SKBitmap hiddenImage, byte outputLow, float opacity) {
+    private static unsafe void ProcessImages(SKBitmap mainImage, SKBitmap hiddenImage, byte outputLow, byte opacity) {
         int mainBytesPerRow = mainImage.RowBytes;
         int hiddenBytesPerRow = hiddenImage.RowBytes;
         int usefulBytesPerRow = Math.Min(mainImage.RowBytes, hiddenImage.RowBytes);
-
+        
         Parallel.For(0, mainImage.Height, y => {
             if (y >= hiddenImage.Height) return;
 
@@ -43,13 +43,13 @@ public class EditedImageSaver {
             if (y % 2 == 0)
                 ProcessNonAlternatingRow(mainRow, hiddenRow, outputLow, opacity);
             else
-                ProcessAlternatingRow(mainRow, hiddenRow, outputLow, opacity);
+                ProcessAlternatingRow(mainRow, hiddenRow, outputLow, opacity); 
         });
     }
     
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void ProcessAlternatingRow(Span<byte> mainRow, ReadOnlySpan<byte> hiddenRow, byte outputLow, float opacity) 
+    private static void ProcessAlternatingRow(Span<byte> mainRow, ReadOnlySpan<byte> hiddenRow, byte outputLow, byte opacity) 
     {
         Span<byte> buffer = stackalloc byte[UnpremulRgba8888BytesPerPixel];
         bool alternative = true; // use blend 
@@ -73,7 +73,7 @@ public class EditedImageSaver {
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void ProcessNonAlternatingRow(Span<byte> mainRow, ReadOnlySpan<byte> hiddenRow, byte outputLow, float opacity) 
+    private static void ProcessNonAlternatingRow(Span<byte> mainRow, ReadOnlySpan<byte> hiddenRow, byte outputLow, byte opacity) 
     {
         Span<byte> buffer = stackalloc byte[UnpremulRgba8888BytesPerPixel];
         for (int x = 0; x < mainRow.Length; x += UnpremulRgba8888BytesPerPixel) {
@@ -88,19 +88,19 @@ public class EditedImageSaver {
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void ApplyBlend(Span<byte> bottomLayer, Span<byte> topLayer, float opacity) 
-    {
-        float opacityComplement = 1 - opacity;
-        bottomLayer[0] = (byte)(topLayer[0] * opacity + bottomLayer[0] * opacityComplement);
-        bottomLayer[1] = (byte)(topLayer[1] * opacity + bottomLayer[1] * opacityComplement);
-        bottomLayer[2] = (byte)(topLayer[2] * opacity + bottomLayer[2] * opacityComplement);
+    private static void ApplyBlend(Span<byte> bottomLayer, Span<byte> topLayer, byte opacity) {
+        byte opacityComplement = (byte)(byte.MaxValue - opacity);
+        bottomLayer[0] = (byte)((topLayer[0] * opacity + bottomLayer[0] * opacityComplement) / byte.MaxValue);
+        bottomLayer[1] = (byte)((topLayer[1] * opacity + bottomLayer[1] * opacityComplement) / byte.MaxValue);
+        bottomLayer[2] = (byte)((topLayer[2] * opacity + bottomLayer[2] * opacityComplement) / byte.MaxValue);
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void ApplyOutputLow(Span<byte> pixel, byte outputLow) {
-        pixel[0] = Math.Clamp(pixel[0], outputLow, byte.MaxValue);
-        pixel[1] = Math.Clamp(pixel[1], outputLow, byte.MaxValue);
-        pixel[2] = Math.Clamp(pixel[2], outputLow, byte.MaxValue);
+        byte outputLowComplement = (byte)(byte.MaxValue - outputLow);
+        pixel[0] = (byte)(pixel[0] * outputLowComplement / byte.MaxValue + outputLow);
+        pixel[1] = (byte)(pixel[1] * outputLowComplement / byte.MaxValue + outputLow);
+        pixel[2] = (byte)(pixel[2] * outputLowComplement / byte.MaxValue + outputLow);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
