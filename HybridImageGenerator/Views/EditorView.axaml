@@ -39,7 +39,13 @@
         <Button HorizontalAlignment="Center" Command="{Binding RemoveHiddenImageCommand}" Content="X"/>
       </StackPanel>
       
-      <views:ShaderImageControl Name="MainImageControl" InputShader="{Binding MainShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="1" Grid.Column="0"/>
+      <views:ShaderImageControl InputShader="{Binding MainShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="1" Grid.Column="0">
+        <Interaction.Behaviors>
+          <EventTriggerBehavior EventName="SizeChanged">
+            <InvokeCommandAction Command="{Binding UpdateControlsScaleCommand}" PassEventArgsToCommand="True"></InvokeCommandAction>
+          </EventTriggerBehavior>
+        </Interaction.Behaviors>
+      </views:ShaderImageControl>
       <views:ShaderImageControl InputShader="{Binding HiddenShader, Mode=OneWay}" ImageSize="{Binding HiddenScale}" Grid.Row="1" Grid.Column="1"/>
       <views:ShaderImageControl InputShader="{Binding OutputLowShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="2" Grid.Column="0"/>
       <views:ShaderImageControl InputShader="{Binding NegativeShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="2" Grid.Column="1"/>

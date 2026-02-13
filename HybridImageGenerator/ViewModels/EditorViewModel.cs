@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HybridImageGenerator.Models;
@@ -10,9 +11,6 @@ using SkiaSharp;
 namespace HybridImageGenerator.ViewModels;
 
 public partial class EditorViewModel : ViewModelBase {
-    [ObservableProperty]
-    private Rect _controlsBounds;
-    
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveImageCommand))]
     [NotifyCanExecuteChangedFor(nameof(RemoveMainImageCommand))]
@@ -47,15 +45,25 @@ public partial class EditorViewModel : ViewModelBase {
     private ImageEditor _imageEditor;
     private ImageFileService _fileService;
     private ErrorDispatcher _errorDispatcher;
+    
+    [ObservableProperty]
+    private Size _controlsSize;
 
-    partial void OnOutputLowChanged(byte value) => _imageEditor.OutputLow = value;
+    partial void OnOutputLowChanged(byte value) {
+        if (_imageEditor.Initialized)
+            _imageEditor.OutputLow = value;
+    }
 
-    partial void OnOpacityChanged(byte value) => _imageEditor.Opacity = value;
+    partial void OnOpacityChanged(byte value) {
+        if (_imageEditor.Initialized)
+            _imageEditor.Opacity = value;
+    }
 
-    partial void OnGammaChanged(float value) => _imageEditor.Gamma = value;
-
-    // partial void OnControlsBoundsChanged(Rect value) => _imageEditor.SetRenderSize(value.Size);
-
+    partial void OnGammaChanged(float value) {
+        if (_imageEditor.Initialized)
+            _imageEditor.Gamma = value;
+    }
+    
     public EditorViewModel(ImageFileService fileService, ImageEditor editor, ErrorDispatcher errorDispatcher) {
         _imageEditor = editor;
         _fileService = fileService;
@@ -160,5 +168,14 @@ public partial class EditorViewModel : ViewModelBase {
 
         _imageEditor.MainScaleChanged += (_, size) => MainScale = size;
         _imageEditor.HiddenScaleChanged += (_, size) => HiddenScale = size;
+        _imageEditor.SetRenderSize(ControlsSize);
+    }
+
+    [RelayCommand]
+    private void UpdateControlsScale(SizeChangedEventArgs args) {
+        ControlsSize = args.NewSize;
+        if (!_imageEditor.Initialized) return;
+        
+        _imageEditor.SetRenderSize(args.NewSize);
     }
 }
