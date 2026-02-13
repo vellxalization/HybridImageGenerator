@@ -6,7 +6,7 @@ using Avalonia.Rendering.SceneGraph;
 using Avalonia.Skia;
 using SkiaSharp;
 
-namespace HybridImageGenerator.Views;
+namespace HybridImageGenerator.Views.Controls;
 
 public class DrawToUIOperation(SKPaint paint, Rect bounds) : ICustomDrawOperation {
     

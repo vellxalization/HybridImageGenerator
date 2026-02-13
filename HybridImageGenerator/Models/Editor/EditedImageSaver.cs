@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using SkiaSharp;
 
-namespace HybridImageGenerator.Models;
+namespace HybridImageGenerator.Models.Editor;
 
 public class EditedImageSaver {
     private const int UnpremulRgba8888BytesPerPixel = 4;

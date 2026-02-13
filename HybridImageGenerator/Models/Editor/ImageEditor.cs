@@ -2,12 +2,12 @@
 using System.IO;
 using System.Threading.Tasks;
 using Avalonia;
-using HybridImageGenerator.Models.ShaderFactories;
+using HybridImageGenerator.Models.Editor.ShaderFactories;
 using SkiaSharp;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-namespace HybridImageGenerator.Models;
+namespace HybridImageGenerator.Models.Editor;
 
 public class ImageEditor(EditedImageSaver saver) {
     public bool Initialized { get; private set; }

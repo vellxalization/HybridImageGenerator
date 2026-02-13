@@ -5,7 +5,7 @@ using Avalonia.Media;
 using Avalonia.Skia;
 using SkiaSharp;
 
-namespace HybridImageGenerator.Views;
+namespace HybridImageGenerator.Views.Controls;
 
 public class ShaderImageControl : Control {
     public static readonly DirectProperty<ShaderImageControl, Size> ImageSizeProperty =

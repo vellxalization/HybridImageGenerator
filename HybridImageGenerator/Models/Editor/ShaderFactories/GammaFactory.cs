@@ -1,7 +1,7 @@
 ﻿using System;
 using SkiaSharp;
 
-namespace HybridImageGenerator.Models.ShaderFactories;
+namespace HybridImageGenerator.Models.Editor.ShaderFactories;
 
 public class GammaFactory : ShaderFactory {
     public float Gamma { 

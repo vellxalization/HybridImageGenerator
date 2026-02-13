@@ -1,6 +1,6 @@
 ﻿using SkiaSharp;
 
-namespace HybridImageGenerator.Models.ShaderFactories;
+namespace HybridImageGenerator.Models.Editor.ShaderFactories;
 
 public class NegativeFactory() : ShaderFactory(SkSlShader) {
     private const string SkSlShader =

@@ -1,6 +1,6 @@
 ﻿using SkiaSharp;
 
-namespace HybridImageGenerator.Models.ShaderFactories;
+namespace HybridImageGenerator.Models.Editor.ShaderFactories;
 
 public class OverlayFactory(byte startingValue = 0) : ShaderFactory(SkSlShader) {
     public byte Opacity { get; set; } = startingValue;

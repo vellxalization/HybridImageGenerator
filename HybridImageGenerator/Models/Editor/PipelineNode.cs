@@ -1,8 +1,8 @@
 ﻿using System;
-using HybridImageGenerator.Models.ShaderFactories;
+using HybridImageGenerator.Models.Editor.ShaderFactories;
 using SkiaSharp;
 
-namespace HybridImageGenerator.Models;
+namespace HybridImageGenerator.Models.Editor;
 
 public class PipelineNode<T>(T factory) where T : ShaderFactory {
     public T Factory => factory;

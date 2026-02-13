@@ -1,6 +1,6 @@
 ﻿using SkiaSharp;
 
-namespace HybridImageGenerator.Models.ShaderFactories;
+namespace HybridImageGenerator.Models.Editor.ShaderFactories;
 
 public class StitchingFactory() : ShaderFactory(SkSlShader) {
     public SKShader? OverlayShader { get; set; }

@@ -3,7 +3,7 @@ using System.Buffers.Binary;
 using System.IO;
 using System.IO.Hashing;
 
-namespace HybridImageGenerator.Models;
+namespace HybridImageGenerator.Models.Editor;
 
 public static class PngPatcher
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace HybridImageGenerator.Models;
+namespace HybridImageGenerator.Models.ErrorHandling;
 
 public class ErrorDispatcher {
     public event EventHandler<(ErrorDetails details, TaskCompletionSource src)>? ErrorOccured;

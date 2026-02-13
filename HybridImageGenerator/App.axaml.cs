@@ -5,8 +5,10 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
-using HybridImageGenerator.Models;
+using HybridImageGenerator.Models.Editor;
+using HybridImageGenerator.Models.ErrorHandling;
 using HybridImageGenerator.ViewModels;
+using HybridImageGenerator.ViewModels.ErrorHandling;
 using HybridImageGenerator.Views;
 
 namespace HybridImageGenerator;

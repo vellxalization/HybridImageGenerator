@@ -5,7 +5,8 @@ using Avalonia;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using HybridImageGenerator.Models;
+using HybridImageGenerator.Models.Editor;
+using HybridImageGenerator.Models.ErrorHandling;
 using SkiaSharp;
 
 namespace HybridImageGenerator.ViewModels;

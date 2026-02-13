@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices.JavaScript;
-using HybridImageGenerator.Models;
+using HybridImageGenerator.Models.ErrorHandling;
 
-namespace HybridImageGenerator.ViewModels;
+namespace HybridImageGenerator.ViewModels.ErrorHandling;
 
 public sealed partial class WebErrorViewModel(ErrorDispatcher errorDispatcher) : ErrorViewModel(errorDispatcher, "Reload app") {
     [JSImport("globalThis.location.reload")]

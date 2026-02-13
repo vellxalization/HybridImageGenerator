@@ -1,10 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using HybridImageGenerator.Models;
+using HybridImageGenerator.Models.ErrorHandling;
 
-namespace HybridImageGenerator.ViewModels;
+namespace HybridImageGenerator.ViewModels.ErrorHandling;
 
 public abstract partial class ErrorViewModel : ViewModelBase {
     [ObservableProperty]

@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using HybridImageGenerator.ViewModels.ErrorHandling;
 
 namespace HybridImageGenerator.ViewModels;
 
