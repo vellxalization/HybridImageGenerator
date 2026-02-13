@@ -24,5 +24,6 @@
         <PackageReference Include="CommunityToolkit.Mvvm"/>
         <PackageReference Include="SkiaSharp" />
         <PackageReference Include="System.IO.Hashing" />
+        <PackageReference Include="Xaml.Behaviors" />
     </ItemGroup>
 </Project>

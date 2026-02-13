@@ -19,5 +19,6 @@
     <PackageVersion Include="SkiaSharp" Version="2.88.9" />
     <PackageVersion Include="System.IO.Hashing" Version="10.0.2" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.15" />
+    <PackageVersion Include="Xaml.Behaviors" Version="11.3.9.5" />
   </ItemGroup>
 </Project>
