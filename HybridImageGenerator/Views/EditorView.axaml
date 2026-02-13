@@ -8,8 +8,12 @@
              x:Class="HybridImageGenerator.Views.EditorView"
              x:DataType="viewModels:EditorViewModel"
              >
-    
-    <Grid>
+  <Interaction.Behaviors>
+    <EventTriggerBehavior EventName="Loaded">
+      <InvokeCommandAction Command="{Binding InitializeEditorCommand}"></InvokeCommandAction>
+    </EventTriggerBehavior>
+  </Interaction.Behaviors>
+  <Grid>
     
     <Grid.RowDefinitions>
       <RowDefinition Height="*"/>
@@ -60,5 +64,4 @@
      
       <Button HorizontalAlignment="Center" Command="{Binding SaveImageCommand}" Content="Save"/>
   </Grid>
-    
 </UserControl>

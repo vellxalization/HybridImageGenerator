@@ -19,7 +19,7 @@ public partial class App : Application {
     public override void OnFrameworkInitializationCompleted() {
         var errorDispatcher = new ErrorDispatcher();
         var editor = new ImageEditor(new EditedImageSaver());
-        editor.Initialize();
+        
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
             DisableAvaloniaDataAnnotationValidation();
             

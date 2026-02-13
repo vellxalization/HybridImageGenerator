@@ -43,49 +43,27 @@ public partial class EditorViewModel : ViewModelBase {
     private Size _mainScale;
     [ObservableProperty]
     private Size _hiddenScale;
-    
-    public ImageEditor ImageEditor { get; init; }
+
+    private ImageEditor _imageEditor;
     private ImageFileService _fileService;
     private ErrorDispatcher _errorDispatcher;
 
-    partial void OnOutputLowChanged(byte value) => ImageEditor.OutputLow = value;
+    partial void OnOutputLowChanged(byte value) => _imageEditor.OutputLow = value;
 
-    partial void OnOpacityChanged(byte value) => ImageEditor.Opacity = value;
+    partial void OnOpacityChanged(byte value) => _imageEditor.Opacity = value;
 
-    partial void OnGammaChanged(float value) => ImageEditor.Gamma = value;
+    partial void OnGammaChanged(float value) => _imageEditor.Gamma = value;
 
-    partial void OnControlsBoundsChanged(Rect value) => ImageEditor.SetRenderSize(value.Size);
+    // partial void OnControlsBoundsChanged(Rect value) => _imageEditor.SetRenderSize(value.Size);
 
     public EditorViewModel(ImageFileService fileService, ImageEditor editor, ErrorDispatcher errorDispatcher) {
-        ImageEditor = editor;
+        _imageEditor = editor;
         _fileService = fileService;
         _errorDispatcher = errorDispatcher;
-        
-        ImageEditor.MainShaderChanged += (_, shader) => MainShader = shader;
-        ImageEditor.HiddenShaderChanged += (_, shader) => HiddenShader = shader;
-        ImageEditor.OutputLowShaderChanged += (_, shader) => OutputLowShader = shader;
-        ImageEditor.NegativeShaderChanged += (_, shader) => NegativeShader = shader;
-        ImageEditor.OverlayShaderChanged += (_, shader) => OverlayShader = shader;
-        ImageEditor.StitchShaderChanged += (_, shader) => StitchShader = shader;
-        ImageEditor.GammaShaderChanged += (_, shader) => GammaShader = shader;
-
-        ImageEditor.MainScaleChanged += (_, size) => MainScale = size;
-        ImageEditor.HiddenScaleChanged += (_, size) => HiddenScale = size;
     }
     
     [RelayCommand]
     private async Task LoadMainImage() {
-        try {
-            // TODO: i don't like this. I need to rewrite this
-            if (!ImageEditor.Initialized)
-                ImageEditor.Initialize();
-        }
-        catch (Exception ex) {
-            var details = new ErrorDetails(true, ex.Message, ex.StackTrace);
-            await _errorDispatcher.Invoke(details);
-            return;
-        }
-        
         try {
             await using Stream? file = await _fileService.SelectOpenFile();
             if (file is null) return;
@@ -94,7 +72,7 @@ public partial class EditorViewModel : ViewModelBase {
             await file.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
             var image = SKImage.FromEncodedData(memoryStream);
-            if (!ImageEditor.TrySetMainImage(image, out string? error)) {
+            if (!_imageEditor.TrySetMainImage(image, out string? error)) {
                 var details = new ErrorDetails(false, error!);
                 await _errorDispatcher.Invoke(details);
             }
@@ -108,16 +86,6 @@ public partial class EditorViewModel : ViewModelBase {
     [RelayCommand]
     private async Task LoadHiddenImage() {
         try {
-            if (!ImageEditor.Initialized)
-                ImageEditor.Initialize();
-        }
-        catch (Exception ex) {
-            var details = new ErrorDetails(true, ex.Message, ex.StackTrace);
-            await _errorDispatcher.Invoke(details);
-            return;
-        }
-        
-        try {
             await using Stream? file = await _fileService.SelectOpenFile();
             if (file is null) return;
 
@@ -125,7 +93,7 @@ public partial class EditorViewModel : ViewModelBase {
             await file.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
             var image = SKImage.FromEncodedData(memoryStream);
-            if (!ImageEditor.TrySetHiddenImage(image, out string? error)) {
+            if (!_imageEditor.TrySetHiddenImage(image, out string? error)) {
                 var details = new ErrorDetails(false, error!);
                 await _errorDispatcher.Invoke(details);
             }
@@ -140,17 +108,7 @@ public partial class EditorViewModel : ViewModelBase {
     [RelayCommand(CanExecute=nameof(CanSave))]
     private async Task SaveImage() {
         try {
-            if (!ImageEditor.Initialized)
-                ImageEditor.Initialize();
-        }
-        catch (Exception ex) {
-            var details = new ErrorDetails(true, ex.Message, ex.StackTrace);
-            await _errorDispatcher.Invoke(details);
-            return;
-        }
-        
-        try {
-            using var patchedImage = await ImageEditor.SaveAsync();
+            using var patchedImage = await _imageEditor.SaveAsync();
             await using Stream? file = await _fileService.SelectSaveFile();
             if (file is null || !file.CanWrite) return;
 
@@ -167,15 +125,40 @@ public partial class EditorViewModel : ViewModelBase {
 
     [RelayCommand(CanExecute=nameof(CanRemoveMainImage))]
     private void RemoveMainImage() {
-        ImageEditor.RemoveMainImage();
+        _imageEditor.RemoveMainImage();
     }
 
     private bool CanRemoveMainImage() => MainShader is not null;
     
     [RelayCommand(CanExecute=nameof(CanRemoveHiddenImage))]
     private void RemoveHiddenImage() {
-        ImageEditor.RemoveHiddenImage();
+        _imageEditor.RemoveHiddenImage();
     }
     
     private bool CanRemoveHiddenImage() => HiddenShader is not null;
+
+    [RelayCommand]
+    private async Task InitializeEditor() {
+        if (_imageEditor.Initialized) return;
+
+        try {
+            _imageEditor.Initialize();
+        }
+        catch (Exception ex) {
+            var details = new ErrorDetails(true, ex.Message, ex.StackTrace);
+            await _errorDispatcher.Invoke(details);
+            return;
+        }
+        
+        _imageEditor.MainShaderChanged += (_, shader) => MainShader = shader;
+        _imageEditor.HiddenShaderChanged += (_, shader) => HiddenShader = shader;
+        _imageEditor.OutputLowShaderChanged += (_, shader) => OutputLowShader = shader;
+        _imageEditor.NegativeShaderChanged += (_, shader) => NegativeShader = shader;
+        _imageEditor.OverlayShaderChanged += (_, shader) => OverlayShader = shader;
+        _imageEditor.StitchShaderChanged += (_, shader) => StitchShader = shader;
+        _imageEditor.GammaShaderChanged += (_, shader) => GammaShader = shader;
+
+        _imageEditor.MainScaleChanged += (_, size) => MainScale = size;
+        _imageEditor.HiddenScaleChanged += (_, size) => HiddenScale = size;
+    }
 }

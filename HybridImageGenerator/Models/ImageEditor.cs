@@ -17,7 +17,6 @@ public class ImageEditor(EditedImageSaver saver) {
     private SKImage? _mainImage;
     private SKImage? _hiddenImage;
     
-
     public event EventHandler<SKShader?>? MainShaderChanged; 
     public event EventHandler<SKShader?>? HiddenShaderChanged; 
     public event EventHandler<SKShader?>? OutputLowShaderChanged; 
@@ -108,19 +107,18 @@ public class ImageEditor(EditedImageSaver saver) {
     }
 
     public void SetRenderSize(Size newSize) {
+        EnsureInitialized();
         
         if (newSize == _renderSize) return;
         
         _renderSize = newSize;
         if (_mainImage is not null) {
-            EnsureInitialized();
             var scaled = ScaleImage(_mainImage, newSize);
             MainScaleChanged?.Invoke(this, scaled.shaderSize);
             MainShaderChanged?.Invoke(this, scaled.shader);
         }
         
         if (_hiddenImage is not null) {
-            EnsureInitialized();
             var scaled = ScaleImage(_hiddenImage, newSize);
             HiddenScaleChanged?.Invoke(this, scaled.shaderSize);
             HiddenShaderChanged?.Invoke(this, scaled.shader);
@@ -217,6 +215,8 @@ public class ImageEditor(EditedImageSaver saver) {
     }
     
     public async Task<MemoryStream> SaveAsync() {
+        EnsureInitialized();
+        
         if (!IsValidSkiaObject(_mainImage))
             throw new SkiaObjectInvalidStateException("Main image is invalid");
         
