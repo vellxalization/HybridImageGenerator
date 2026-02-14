@@ -32,7 +32,6 @@ public class ImageFileService(Func<IStorageProvider> storageProviderGetter) {
     }
     
     public async Task<Stream?> SelectSaveFile() {
-        //TODO: firefox creates a stream when a save dialog is open, not when the actual file is selected
         IStorageProvider storageProvider = storageProviderGetter();
         IStorageFile? file = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions {
             SuggestedFileName = "output",
