@@ -10,7 +10,7 @@ public abstract class ShaderFactory : IDisposable {
     public SKShader? InputShader { get; set; }
     
     protected ShaderFactory(string skSlShader) {
-        Effect = SKRuntimeEffect.Create(skSlShader, out var errors) 
+        Effect = SKRuntimeEffect.Create(skSlShader, out string? errors) 
                  ?? throw new ArgumentException($"Error while creating effect: {errors}");
         
         EmptyUniforms =  new SKRuntimeEffectUniforms(Effect);

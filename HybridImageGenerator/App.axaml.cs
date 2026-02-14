@@ -61,11 +61,11 @@ public partial class App : Application {
     
     private void DisableAvaloniaDataAnnotationValidation() {
         // Get an array of plugins to remove
-        var dataValidationPluginsToRemove =
+        DataAnnotationsValidationPlugin[] dataValidationPluginsToRemove =
             BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
 
         // remove each entry found
-        foreach (var plugin in dataValidationPluginsToRemove) {
+        foreach (DataAnnotationsValidationPlugin plugin in dataValidationPluginsToRemove) {
             BindingPlugins.DataValidators.Remove(plugin);
         }
     }

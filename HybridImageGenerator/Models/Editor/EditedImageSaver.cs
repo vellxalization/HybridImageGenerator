@@ -15,8 +15,8 @@ public class EditedImageSaver {
         if (!IsValidBitmap(hiddenImage))
             throw new InvalidImageFormatException("Hidden image must have unpremultiplied alpha and RGBA8888 color type");
         
-        var info = new SKImageInfo(mainImage.Width, mainImage.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul);
-        var result = new SKBitmap(info);
+        SKImageInfo info = new(mainImage.Width, mainImage.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul);
+        SKBitmap result = new(info);
         
         mainImage.CopyTo(result);
         await Task.Run(() => ProcessImages(result, hiddenImage, outputLow, opacity));
@@ -34,7 +34,7 @@ public class EditedImageSaver {
             int mainRowOffset = y * mainBytesPerRow;
             int hiddenRowOffset = y * hiddenBytesPerRow;
 
-            Span<byte> mainSpan = new Span<byte>(mainImage.GetPixels().ToPointer(), mainImage.ByteCount);
+            Span<byte> mainSpan = new(mainImage.GetPixels().ToPointer(), mainImage.ByteCount);
             ReadOnlySpan<byte> hiddenSpan = hiddenImage.GetPixelSpan();
 
             Span<byte> mainRow = mainSpan.Slice(mainRowOffset, usefulBytesPerRow);
@@ -116,8 +116,8 @@ public class EditedImageSaver {
         if (IsValidImage(image))
             return SKBitmap.FromImage(image);
         
-        var info = new SKImageInfo(image.Width, image.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul);
-        var bitmap = new SKBitmap(info);
+        SKImageInfo info = new(image.Width, image.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul);
+        SKBitmap bitmap = new(info);
         image.ReadPixels(info, bitmap.GetPixels());
         
         return bitmap;

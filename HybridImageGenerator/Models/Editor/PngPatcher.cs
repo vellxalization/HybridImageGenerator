@@ -10,7 +10,7 @@ public static class PngPatcher
     public static void PatchGamma(MemoryStream stream, float gamma) {
         PngValidator.Validate(stream);
         
-        if (!TryFindGamaChunk(stream, out var chunk))
+        if (!TryFindGamaChunk(stream, out PngChunk chunk))
             chunk = AppendGamaChunk(stream);
         
         PatchGamaChunk(stream, chunk, gamma);
@@ -20,14 +20,14 @@ public static class PngPatcher
         const int gamaFieldLength = 4; // each field in gama chunk is 4 bytes long
         const float gamaMultiplier = 100_000;
         
-        var span = stream.GetBuffer().AsSpan();
-        var gamaSpan = span.Slice((int)gamaChunk.DataStart, gamaFieldLength);
-        var crcSpan = span.Slice((int)(gamaChunk.DataStart + gamaFieldLength), gamaFieldLength);
+        Span<byte> span = stream.GetBuffer().AsSpan();
+        Span<byte> gamaSpan = span.Slice((int)gamaChunk.DataStart, gamaFieldLength);
+        Span<byte> crcSpan = span.Slice((int)(gamaChunk.DataStart + gamaFieldLength), gamaFieldLength);
         
-        var gamma = (uint)(newGammaValue * gamaMultiplier);
+        uint gamma = (uint)(newGammaValue * gamaMultiplier);
         BinaryPrimitives.WriteUInt32BigEndian(gamaSpan, gamma);
 
-        var crc = CalculateCrcForGamaChunk(gamaChunk.Name, gamma);
+        uint crc = CalculateCrcForGamaChunk(gamaChunk.Name, gamma);
         BinaryPrimitives.WriteUInt32BigEndian(crcSpan, crc);
     }
 
@@ -38,7 +38,7 @@ public static class PngPatcher
         BinaryPrimitives.WriteUInt32BigEndian(span.Slice(0, gamaFieldLength), name);
         BinaryPrimitives.WriteUInt32BigEndian(span.Slice(gamaFieldLength, gamaFieldLength), value);
         
-        var crc = Crc32.HashToUInt32(span);
+        uint crc = Crc32.HashToUInt32(span);
         return crc;
     }
 
@@ -53,20 +53,20 @@ public static class PngPatcher
         stream.Position = pngSignatureLength;
         _ = PngChunk.ReadFromStream(stream); // skip IHDR chunk
 
-        var chunkStartPosition = (int)stream.Position;
-        var remainingDataLength = (int)(stream.Length - chunkStartPosition);
+        int chunkStartPosition = (int)stream.Position;
+        int remainingDataLength = (int)(stream.Length - chunkStartPosition);
         stream.SetLength(stream.Length + gamaChunkLength);
-        var span = stream.GetBuffer().AsSpan();
-        var currentDataSpan = span.Slice(chunkStartPosition, remainingDataLength);
-        var newDataSpan = span.Slice(chunkStartPosition + gamaChunkLength, remainingDataLength);
+        Span<byte> span = stream.GetBuffer().AsSpan();
+        Span<byte> currentDataSpan = span.Slice(chunkStartPosition, remainingDataLength);
+        Span<byte> newDataSpan = span.Slice(chunkStartPosition + gamaChunkLength, remainingDataLength);
         currentDataSpan.CopyTo(newDataSpan);
 
-        var lengthSpan = span.Slice(chunkStartPosition, gamaFieldLength);
-        var nameSpan = span.Slice(chunkStartPosition + gamaFieldLength, gamaFieldLength);
+        Span<byte> lengthSpan = span.Slice(chunkStartPosition, gamaFieldLength);
+        Span<byte> nameSpan = span.Slice(chunkStartPosition + gamaFieldLength, gamaFieldLength);
         lengthValue.CopyTo(lengthSpan);
         gamaSignatureAsBytes.CopyTo(nameSpan);
             
-        var chunk = new PngChunk() {
+        PngChunk chunk = new() {
             Length = gamaFieldLength, 
             Name = gamaSignature,
             DataStart = chunkStartPosition + gamaFieldLength * 2,
@@ -81,7 +81,7 @@ public static class PngPatcher
         const uint iDatName = 0x49444154;
         
         stream.Position = pngHeaderLength;
-        var chunk = PngChunk.ReadFromStream(stream);
+        PngChunk chunk = PngChunk.ReadFromStream(stream);
         while (chunk.Name != iDatName) {
             if (chunk.Name != gamaName) {
                 chunk = PngChunk.ReadFromStream(stream);
@@ -118,8 +118,8 @@ public static class PngPatcher
             if (stream.Length < pngSignatureLength)
                 return false;
             
-            var span = stream.GetBuffer().AsSpan();
-            var signature = BinaryPrimitives.ReadUInt64BigEndian(span.Slice(0, pngSignatureLength));
+            Span<byte> span = stream.GetBuffer().AsSpan();
+            ulong signature = BinaryPrimitives.ReadUInt64BigEndian(span.Slice(0, pngSignatureLength));
 
             return signature == pngSignature;
         }
@@ -129,7 +129,7 @@ public static class PngPatcher
             const int pngHeaderLength = 8;
 
             stream.Position = pngHeaderLength; 
-            var chunk = PngChunk.ReadFromStream(stream);
+            PngChunk chunk = PngChunk.ReadFromStream(stream);
             return chunk.Name == iHdrSignature;
         }
 
@@ -137,7 +137,7 @@ public static class PngPatcher
             const uint iDatSignature = 0x49444154;
             
             while (stream.Position < stream.Length) {
-                var chunk = PngChunk.ReadFromStream(stream);
+                PngChunk chunk = PngChunk.ReadFromStream(stream);
                 if (chunk.Name == iDatSignature)
                     return true;
             }
@@ -150,7 +150,7 @@ public static class PngPatcher
             const uint iEndSignature = 0x49454E44;
 
             stream.Position = stream.Length - iEndChunkLength;
-            var chunk = PngChunk.ReadFromStream(stream);
+            PngChunk chunk = PngChunk.ReadFromStream(stream);
             return chunk.Name == iEndSignature;
         }
     }
@@ -168,19 +168,19 @@ public static class PngPatcher
             const int nameFieldOffset = 4;
             const int dataFieldOffset = 8;
             
-            var span = stream.GetBuffer().AsSpan();
-            var position = (int)stream.Position;
+            Span<byte> span = stream.GetBuffer().AsSpan();
+            int position = (int)stream.Position;
 
-            var lengthSpan = span.Slice(position + lengthFieldOffset, nonDataFieldLength);
-            var length = BinaryPrimitives.ReadUInt32BigEndian(lengthSpan);
-            var nameSpan = span.Slice(position + nameFieldOffset, nonDataFieldLength);
-            var name = BinaryPrimitives.ReadUInt32BigEndian(nameSpan);
-            var crcSpan = span.Slice(position + dataFieldOffset + (int)length, nonDataFieldLength);
-            var crc = BinaryPrimitives.ReadUInt32BigEndian(crcSpan);
+            Span<byte> lengthSpan = span.Slice(position + lengthFieldOffset, nonDataFieldLength);
+            uint length = BinaryPrimitives.ReadUInt32BigEndian(lengthSpan);
+            Span<byte> nameSpan = span.Slice(position + nameFieldOffset, nonDataFieldLength);
+            uint name = BinaryPrimitives.ReadUInt32BigEndian(nameSpan);
+            Span<byte> crcSpan = span.Slice(position + dataFieldOffset + (int)length, nonDataFieldLength);
+            uint crc = BinaryPrimitives.ReadUInt32BigEndian(crcSpan);
 
             stream.Position += nonDataFieldLength * 3 + length;
 
-            var chunk = new PngChunk() {
+            PngChunk chunk = new() {
                 Length = length,
                 Name = name,
                 DataStart = position + dataFieldOffset,

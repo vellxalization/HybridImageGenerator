@@ -18,8 +18,8 @@ public class ImageFileService(Func<IStorageProvider> storageProviderGetter) {
     ];
     
     public async Task<Stream?> SelectOpenFile() {
-        var storageProvider = storageProviderGetter();
-        IReadOnlyList<IStorageFile> files = await storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions() {
+        IStorageProvider storageProvider = storageProviderGetter();
+        IReadOnlyList<IStorageFile> files = await storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions {
             FileTypeFilter = _openFilter,
             AllowMultiple = false
         });
@@ -33,8 +33,8 @@ public class ImageFileService(Func<IStorageProvider> storageProviderGetter) {
     
     public async Task<Stream?> SelectSaveFile() {
         //TODO: firefox creates a stream when a save dialog is open, not when the actual file is selected
-        var storageProvider = storageProviderGetter();
-        IStorageFile? file = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions() {
+        IStorageProvider storageProvider = storageProviderGetter();
+        IStorageFile? file = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions {
             SuggestedFileName = "output",
             DefaultExtension = "gif",
             FileTypeChoices = _saveFilter

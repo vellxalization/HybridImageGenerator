@@ -113,13 +113,13 @@ public class ImageEditor(EditedImageSaver saver) {
         
         _renderSize = newSize;
         if (_mainImage is not null) {
-            var scaled = ScaleImage(_mainImage, newSize);
+            (SKShader shader, Size shaderSize) scaled = ScaleImage(_mainImage, newSize);
             MainScaleChanged?.Invoke(this, scaled.shaderSize);
             MainShaderChanged?.Invoke(this, scaled.shader);
         }
         
         if (_hiddenImage is not null) {
-            var scaled = ScaleImage(_hiddenImage, newSize);
+            (SKShader shader, Size shaderSize) scaled = ScaleImage(_hiddenImage, newSize);
             HiddenScaleChanged?.Invoke(this, scaled.shaderSize);
             HiddenShaderChanged?.Invoke(this, scaled.shader);
         }
@@ -136,7 +136,7 @@ public class ImageEditor(EditedImageSaver saver) {
             return false;
         }
 
-        var scaled = ScaleImage(image, _renderSize);
+        (SKShader shader, Size shaderSize) scaled = ScaleImage(image, _renderSize);
         
         _mainImage?.Dispose();
         _mainImage = image;
@@ -159,7 +159,7 @@ public class ImageEditor(EditedImageSaver saver) {
             return false;
         }
         
-        var scaled = ScaleImage(image, _renderSize);
+        (SKShader shader, Size shaderSize) scaled = ScaleImage(image, _renderSize);
         
         _hiddenImage?.Dispose();
         _hiddenImage = image;
@@ -192,24 +192,24 @@ public class ImageEditor(EditedImageSaver saver) {
     }
     
     private static (SKShader shader, Size shaderSize) ScaleImage(SKImage image, Size sizeToFit) {
-        var scaleMatrix = CalculateScaleMatrix(sizeToFit, image.Width, image.Height);
-        var scaledImage = image.ToShader().WithLocalMatrix(scaleMatrix);
+        SKMatrix scaleMatrix = CalculateScaleMatrix(sizeToFit, image.Width, image.Height);
+        SKShader? scaledImage = image.ToShader().WithLocalMatrix(scaleMatrix);
         if (!IsValidSkiaObject(scaledImage)) {
             scaledImage?.Dispose();
             throw new SkiaObjectInvalidStateException("Failed to generate shader from main image");
         }
         
-        var scaledSize = new Size(image.Width * scaleMatrix.ScaleX, image.Height * scaleMatrix.ScaleY);
+        Size scaledSize = new(image.Width * scaleMatrix.ScaleX, image.Height * scaleMatrix.ScaleY);
         return (scaledImage, scaledSize);
     }
     
     private static SKMatrix CalculateScaleMatrix(Size sizeToFit, int imageWidth, int imageHeight) {
-        var widthScale = (float)sizeToFit.Width / imageWidth;
-        var heightScale = (float)sizeToFit.Height / imageHeight;
-        var scale = Math.Min(widthScale, heightScale); // maintain aspect ratio of the image
+        float widthScale = (float)sizeToFit.Width / imageWidth;
+        float heightScale = (float)sizeToFit.Height / imageHeight;
+        float scale = Math.Min(widthScale, heightScale); // maintain aspect ratio of the image
         
-        var xTranslation = ((float)sizeToFit.Width - (imageWidth * scale)) / 2;
-        var yTranslation = ((float)sizeToFit.Height - (imageHeight * scale)) / 2;
+        float xTranslation = ((float)sizeToFit.Width - (imageWidth * scale)) / 2;
+        float yTranslation = ((float)sizeToFit.Height - (imageHeight * scale)) / 2;
         
         return SKMatrix.CreateScaleTranslation(scale, scale, xTranslation, yTranslation);
     }
@@ -231,8 +231,8 @@ public class ImageEditor(EditedImageSaver saver) {
         if (!IsValidSkiaObject(data))
             throw new SkiaObjectInvalidStateException("Failed to save final image");
         
-        var memoryStream = new MemoryStream((int)data!.Size);
-        await using var dataStream = data.AsStream();
+        MemoryStream memoryStream = new((int)data!.Size);
+        await using Stream? dataStream = data.AsStream();
         await dataStream.CopyToAsync(memoryStream);
         PngPatcher.PatchGamma(memoryStream, Gamma);
         

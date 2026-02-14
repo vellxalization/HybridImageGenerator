@@ -28,7 +28,7 @@ public class ShaderImageControl : Control {
         set => SetAndRaise(InputShaderProperty, ref field, value);
     }
 
-    private readonly SKPaint _paint = new SKPaint();
+    private readonly SKPaint _paint = new();
 
     static ShaderImageControl() {
         InputShaderProperty.Changed.AddClassHandler<ShaderImageControl>(
@@ -39,13 +39,13 @@ public class ShaderImageControl : Control {
     public override void Render(DrawingContext context) {
         if (InputShader is null || InputShader.Handle == IntPtr.Zero) return;
         
-        var renderRect = CalculateRenderRect(Bounds, ImageSize);
-        var drawOperation = new DrawToUIOperation(_paint, renderRect.ToAvaloniaRect());
+        SKRect renderRect = CalculateRenderRect(Bounds, ImageSize);
+        DrawToUIOperation drawOperation = new(_paint, renderRect.ToAvaloniaRect());
         context.Custom(drawOperation);
     }
     
     private static SKRect CalculateRenderRect(Rect controlBounds, Size imageSize) {
-        var renderRect = new SKRect() {
+        SKRect renderRect = new() {
             Location = new SKPoint((float)(controlBounds.Width / 2 - imageSize.Width / 2), (float)(controlBounds.Height / 2 - imageSize.Height / 2)),
             Size = new SKSize((float)imageSize.Width, (float)imageSize.Height)
         };

@@ -32,7 +32,7 @@ public abstract partial class ErrorViewModel : ViewModelBase {
         IsVisible = true;
         _currentErrorTsc = args.tsc;
         
-        var details = args.details;
+        ErrorDetails details = args.details;
         IsFatalError = details.IsFatal;
         Message = details.Message;
         StackTrace = details.StackTrace;

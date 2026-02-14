@@ -13,7 +13,7 @@ public class DrawToUIOperation(SKPaint paint, Rect bounds) : ICustomDrawOperatio
     public void Render(ImmediateDrawingContext context) {
         if (paint.Handle == IntPtr.Zero || paint.Shader is null || paint.Shader.Handle == IntPtr.Zero) return;
         
-        using var lease = context.PlatformImpl.GetFeature<ISkiaSharpApiLeaseFeature>()?.Lease();
+        using ISkiaSharpApiLease? lease = context.PlatformImpl.GetFeature<ISkiaSharpApiLeaseFeature>()?.Lease();
         lease?.SkCanvas.DrawRect(Bounds.ToSKRect(), paint);
     }
     

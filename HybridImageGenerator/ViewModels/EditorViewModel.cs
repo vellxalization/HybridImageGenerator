@@ -77,17 +77,17 @@ public partial class EditorViewModel : ViewModelBase {
             await using Stream? file = await _fileService.SelectOpenFile();
             if (file is null) return;
 
-            using var memoryStream = new MemoryStream((int)file.Length);
+            using MemoryStream memoryStream = new((int)file.Length);
             await file.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
-            var image = SKImage.FromEncodedData(memoryStream);
+            SKImage? image = SKImage.FromEncodedData(memoryStream);
             if (!_imageEditor.TrySetMainImage(image, out string? error)) {
-                var details = new ErrorDetails(false, error!);
+                ErrorDetails details = new(false, error!);
                 await _errorDispatcher.Invoke(details);
             }
         }
         catch (Exception ex) {
-            var details = new ErrorDetails(false, ex.Message, ex.StackTrace);
+            ErrorDetails details = new(false, ex.Message, ex.StackTrace);
             await _errorDispatcher.Invoke(details);
         }
     }
@@ -98,18 +98,18 @@ public partial class EditorViewModel : ViewModelBase {
             await using Stream? file = await _fileService.SelectOpenFile();
             if (file is null) return;
 
-            using var memoryStream = new MemoryStream((int)file.Length);
+            using MemoryStream memoryStream = new((int)file.Length);
             await file.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
-            var image = SKImage.FromEncodedData(memoryStream);
+            SKImage? image = SKImage.FromEncodedData(memoryStream);
             if (!_imageEditor.TrySetHiddenImage(image, out string? error)) {
-                var details = new ErrorDetails(false, error!);
+                ErrorDetails details = new(false, error!);
                 await _errorDispatcher.Invoke(details);
             }
         }
         catch (Exception ex) {
-            var isFatal = ex is ImageEditor.EditorNotInitialized;
-            var details = new ErrorDetails(isFatal, ex.Message, ex.StackTrace);
+            bool isFatal = ex is ImageEditor.EditorNotInitialized;
+            ErrorDetails details = new(isFatal, ex.Message, ex.StackTrace);
             await _errorDispatcher.Invoke(details);
         }
     }
@@ -117,7 +117,7 @@ public partial class EditorViewModel : ViewModelBase {
     [RelayCommand(CanExecute=nameof(CanSave))]
     private async Task SaveImage() {
         try {
-            using var patchedImage = await _imageEditor.SaveAsync();
+            using MemoryStream patchedImage = await _imageEditor.SaveAsync();
             await using Stream? file = await _fileService.SelectSaveFile();
             if (file is null || !file.CanWrite) return;
 
@@ -125,7 +125,7 @@ public partial class EditorViewModel : ViewModelBase {
             await patchedImage.CopyToAsync(file);
         }
         catch (Exception ex) {
-            var details = new ErrorDetails(false, ex.Message, ex.StackTrace);
+            ErrorDetails details = new(false, ex.Message, ex.StackTrace);
             await _errorDispatcher.Invoke(details);
         }
     }
@@ -154,7 +154,7 @@ public partial class EditorViewModel : ViewModelBase {
             _imageEditor.Initialize();
         }
         catch (Exception ex) {
-            var details = new ErrorDetails(true, ex.Message, ex.StackTrace);
+            ErrorDetails details = new(true, ex.Message, ex.StackTrace);
             await _errorDispatcher.Invoke(details);
             return;
         }

@@ -9,7 +9,7 @@ public class ErrorDispatcher {
     public Task Invoke(ErrorDetails details) {
         if (ErrorOccured is null) return Task.CompletedTask;
         
-        var tsc = new TaskCompletionSource();
+        TaskCompletionSource tsc = new();
         ErrorOccured?.Invoke(this, (details, tsc));
         return tsc.Task;
     }
