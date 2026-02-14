@@ -11,7 +11,8 @@ using SkiaSharp;
 
 namespace HybridImageGenerator.ViewModels;
 
-public partial class EditorViewModel : ViewModelBase {
+public partial class EditorViewModel(ImageFileService fileService, ImageEditor editor, ErrorDispatcher errorDispatcher)
+    : ViewModelBase {
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveImageCommand))]
     [NotifyCanExecuteChangedFor(nameof(RemoveMainImageCommand))]
@@ -43,82 +44,72 @@ public partial class EditorViewModel : ViewModelBase {
     [ObservableProperty]
     private Size _hiddenScale;
 
-    private ImageEditor _imageEditor;
-    private ImageFileService _fileService;
-    private ErrorDispatcher _errorDispatcher;
-    
     [ObservableProperty]
     private Size _controlsSize;
 
     partial void OnOutputLowChanged(byte value) {
-        if (_imageEditor.Initialized)
-            _imageEditor.OutputLow = value;
+        if (editor.Initialized)
+            editor.OutputLow = value;
     }
 
     partial void OnOpacityChanged(byte value) {
-        if (_imageEditor.Initialized)
-            _imageEditor.Opacity = value;
+        if (editor.Initialized)
+            editor.Opacity = value;
     }
 
     partial void OnGammaChanged(float value) {
-        if (_imageEditor.Initialized)
-            _imageEditor.Gamma = value;
+        if (editor.Initialized)
+            editor.Gamma = value;
     }
-    
-    public EditorViewModel(ImageFileService fileService, ImageEditor editor, ErrorDispatcher errorDispatcher) {
-        _imageEditor = editor;
-        _fileService = fileService;
-        _errorDispatcher = errorDispatcher;
-    }
-    
+
     [RelayCommand]
     private async Task LoadMainImage() {
         try {
-            await using Stream? file = await _fileService.SelectOpenFile();
+            await using Stream? file = await fileService.SelectOpenFile();
             if (file is null) return;
 
             using MemoryStream memoryStream = new((int)file.Length);
             await file.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
             SKImage? image = SKImage.FromEncodedData(memoryStream);
-            if (!_imageEditor.TrySetMainImage(image, out string? error)) {
+            if (!editor.TrySetMainImage(image, out string? error)) {
                 ErrorDetails details = new(false, error!);
-                await _errorDispatcher.Invoke(details);
+                await errorDispatcher.Invoke(details);
             }
         }
         catch (Exception ex) {
             ErrorDetails details = new(false, ex.Message, ex.StackTrace);
-            await _errorDispatcher.Invoke(details);
+            await errorDispatcher.Invoke(details);
         }
     }
     
     [RelayCommand]
     private async Task LoadHiddenImage() {
         try {
-            await using Stream? file = await _fileService.SelectOpenFile();
+            await using Stream? file = await fileService.SelectOpenFile();
             if (file is null) return;
 
             using MemoryStream memoryStream = new((int)file.Length);
             await file.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
             SKImage? image = SKImage.FromEncodedData(memoryStream);
-            if (!_imageEditor.TrySetHiddenImage(image, out string? error)) {
+            if (!editor.TrySetHiddenImage(image, out string? error)) {
                 ErrorDetails details = new(false, error!);
-                await _errorDispatcher.Invoke(details);
+                await errorDispatcher.Invoke(details);
             }
         }
         catch (Exception ex) {
             bool isFatal = ex is ImageEditor.EditorNotInitialized;
             ErrorDetails details = new(isFatal, ex.Message, ex.StackTrace);
-            await _errorDispatcher.Invoke(details);
+            await errorDispatcher.Invoke(details);
         }
     }
     
     [RelayCommand(CanExecute=nameof(CanSave))]
     private async Task SaveImage() {
         try {
-            using MemoryStream patchedImage = await _imageEditor.SaveAsync();
-            await using Stream? file = await _fileService.SelectSaveFile();
+            using MemoryStream patchedImage = await editor.SaveAsync();
+            await using Stream? file = await fileService.SelectSaveFile();
             if (file is null || !file.CanWrite) return;
 
             patchedImage.Position = 0;
@@ -126,7 +117,7 @@ public partial class EditorViewModel : ViewModelBase {
         }
         catch (Exception ex) {
             ErrorDetails details = new(false, ex.Message, ex.StackTrace);
-            await _errorDispatcher.Invoke(details);
+            await errorDispatcher.Invoke(details);
         }
     }
 
@@ -134,49 +125,49 @@ public partial class EditorViewModel : ViewModelBase {
 
     [RelayCommand(CanExecute=nameof(CanRemoveMainImage))]
     private void RemoveMainImage() {
-        _imageEditor.RemoveMainImage();
+        editor.RemoveMainImage();
     }
 
     private bool CanRemoveMainImage() => MainShader is not null;
     
     [RelayCommand(CanExecute=nameof(CanRemoveHiddenImage))]
     private void RemoveHiddenImage() {
-        _imageEditor.RemoveHiddenImage();
+        editor.RemoveHiddenImage();
     }
     
     private bool CanRemoveHiddenImage() => HiddenShader is not null;
 
     [RelayCommand]
     private async Task InitializeEditor() {
-        if (_imageEditor.Initialized) return;
+        if (editor.Initialized) return;
 
         try {
-            _imageEditor.Initialize();
+            editor.Initialize();
         }
         catch (Exception ex) {
             ErrorDetails details = new(true, ex.Message, ex.StackTrace);
-            await _errorDispatcher.Invoke(details);
+            await errorDispatcher.Invoke(details);
             return;
         }
         
-        _imageEditor.MainShaderChanged += (_, shader) => MainShader = shader;
-        _imageEditor.HiddenShaderChanged += (_, shader) => HiddenShader = shader;
-        _imageEditor.OutputLowShaderChanged += (_, shader) => OutputLowShader = shader;
-        _imageEditor.NegativeShaderChanged += (_, shader) => NegativeShader = shader;
-        _imageEditor.OverlayShaderChanged += (_, shader) => OverlayShader = shader;
-        _imageEditor.StitchShaderChanged += (_, shader) => StitchShader = shader;
-        _imageEditor.GammaShaderChanged += (_, shader) => GammaShader = shader;
+        editor.MainShaderChanged += (_, shader) => MainShader = shader;
+        editor.HiddenShaderChanged += (_, shader) => HiddenShader = shader;
+        editor.OutputLowShaderChanged += (_, shader) => OutputLowShader = shader;
+        editor.NegativeShaderChanged += (_, shader) => NegativeShader = shader;
+        editor.OverlayShaderChanged += (_, shader) => OverlayShader = shader;
+        editor.StitchShaderChanged += (_, shader) => StitchShader = shader;
+        editor.GammaShaderChanged += (_, shader) => GammaShader = shader;
 
-        _imageEditor.MainScaleChanged += (_, size) => MainScale = size;
-        _imageEditor.HiddenScaleChanged += (_, size) => HiddenScale = size;
-        _imageEditor.SetRenderSize(ControlsSize);
+        editor.MainScaleChanged += (_, size) => MainScale = size;
+        editor.HiddenScaleChanged += (_, size) => HiddenScale = size;
+        editor.SetRenderSize(ControlsSize);
     }
 
     [RelayCommand]
     private void UpdateControlsScale(SizeChangedEventArgs args) {
         ControlsSize = args.NewSize;
-        if (!_imageEditor.Initialized) return;
+        if (!editor.Initialized) return;
         
-        _imageEditor.SetRenderSize(args.NewSize);
+        editor.SetRenderSize(args.NewSize);
     }
 }
