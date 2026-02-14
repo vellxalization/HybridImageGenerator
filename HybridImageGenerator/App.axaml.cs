@@ -19,29 +19,44 @@ public partial class App : Application {
     }
 
     public override void OnFrameworkInitializationCompleted() {
-        var errorDispatcher = new ErrorDispatcher();
-        var editor = new ImageEditor(new EditedImageSaver());
-        
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
             DisableAvaloniaDataAnnotationValidation();
-            
-            var mainWindow = new MainWindow();
-            IStorageProvider StorageProviderGetter() => mainWindow.StorageProvider;
-            var imageFileService = new ImageFileService(StorageProviderGetter);
-            var editorViewModel = new EditorViewModel(imageFileService, editor, errorDispatcher);
-            mainWindow.DataContext = new MainViewModel(editorViewModel, new DesktopErrorViewModel(errorDispatcher));
-            desktop.MainWindow = mainWindow;
+
+            desktop.MainWindow = CreateDesktopMainWindow();
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform) {
-            var mainView = new MainView();
-            IStorageProvider StorageProviderGetter() => TopLevel.GetTopLevel(mainView)!.StorageProvider;
-            var imageFileService = new ImageFileService(StorageProviderGetter);
-            var editorViewModel = new EditorViewModel(imageFileService, editor, errorDispatcher);
-            mainView.DataContext = new MainViewModel(editorViewModel, new WebErrorViewModel(errorDispatcher));
-            singleViewPlatform.MainView = mainView;
+            singleViewPlatform.MainView = CreateWebMainView();
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static MainWindow CreateDesktopMainWindow() {
+        ErrorDispatcher dispatcher = new();
+        ImageEditor editor = new(new EditedImageSaver());
+        
+        MainWindow mainWindow = new();
+        ImageFileService imageFileService = new(StorageProviderGetter);
+        EditorViewModel editorViewModel = new(imageFileService, editor, dispatcher);
+        mainWindow.DataContext = new MainViewModel(editorViewModel, new DesktopErrorViewModel(dispatcher));
+        
+        return mainWindow;
+        
+        IStorageProvider StorageProviderGetter() => mainWindow.StorageProvider;
+    }
+    
+    private static MainView CreateWebMainView() {
+        ErrorDispatcher dispatcher = new();
+        ImageEditor editor = new(new EditedImageSaver());
+        
+        MainView mainView = new();
+        ImageFileService imageFileService = new(StorageProviderGetter);
+        EditorViewModel editorViewModel = new(imageFileService, editor, dispatcher);
+        mainView.DataContext = new MainViewModel(editorViewModel, new WebErrorViewModel(dispatcher));
+        
+        return mainView;
+        
+        IStorageProvider StorageProviderGetter() => TopLevel.GetTopLevel(mainView)!.StorageProvider;
     }
     
     private void DisableAvaloniaDataAnnotationValidation() {
