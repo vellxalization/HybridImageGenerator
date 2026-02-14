@@ -7,68 +7,74 @@
              xmlns:controls="clr-namespace:HybridImageGenerator.Views.Controls"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="HybridImageGenerator.Views.EditorView"
-             x:DataType="viewModels:EditorViewModel"
-             >
-  <Interaction.Behaviors>
-    <EventTriggerBehavior EventName="Loaded">
-      <InvokeCommandAction Command="{Binding InitializeEditorCommand}"></InvokeCommandAction>
-    </EventTriggerBehavior>
-  </Interaction.Behaviors>
-  <Grid>
+             x:DataType="viewModels:EditorViewModel">
     
-    <Grid.RowDefinitions>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="*"/>
-    </Grid.RowDefinitions>
-      
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="*"/>
-      <ColumnDefinition Width="*"/>
-      <ColumnDefinition Width="*"/>
-    </Grid.ColumnDefinitions>
-      
-      <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
-        <Button HorizontalAlignment="Center" Command="{Binding LoadMainImageCommand}" Content="Upload main"/>
-        <Button HorizontalAlignment="Center" Command="{Binding RemoveMainImageCommand}" Content="X"/>
-      </StackPanel>
-      
-      <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
-        <Button HorizontalAlignment="Center" Command="{Binding LoadHiddenImageCommand}" Content="Upload hidden"/>
-        <Button HorizontalAlignment="Center" Command="{Binding RemoveHiddenImageCommand}" Content="X"/>
-      </StackPanel>
-      
-      <controls:ShaderImageControl InputShader="{Binding MainShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="1" Grid.Column="0">
-        <Interaction.Behaviors>
-          <EventTriggerBehavior EventName="SizeChanged">
-            <InvokeCommandAction Command="{Binding UpdateControlsScaleCommand}" PassEventArgsToCommand="True"></InvokeCommandAction>
-          </EventTriggerBehavior>
-        </Interaction.Behaviors>
-      </controls:ShaderImageControl>
-      <controls:ShaderImageControl InputShader="{Binding HiddenShader, Mode=OneWay}" ImageSize="{Binding HiddenScale}" Grid.Row="1" Grid.Column="1"/>
-      <controls:ShaderImageControl InputShader="{Binding OutputLowShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="2" Grid.Column="0"/>
-      <controls:ShaderImageControl InputShader="{Binding NegativeShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="2" Grid.Column="1"/>
-      <controls:ShaderImageControl InputShader="{Binding OverlayShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="3" Grid.Column="0"/>
-      <controls:ShaderImageControl InputShader="{Binding StitchShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="4" Grid.Column="0"/>
-      <controls:ShaderImageControl InputShader="{Binding GammaShader, Mode=OneWay}" ImageSize="{Binding MainScale}" Grid.Row="4" Grid.Column="1"/>
+    <Interaction.Behaviors>
+        <EventTriggerBehavior EventName="Loaded">
+            <InvokeCommandAction Command="{Binding InitializeEditorCommand}"></InvokeCommandAction>
+        </EventTriggerBehavior>
+    </Interaction.Behaviors>
     
-      <StackPanel Grid.Row="2" Grid.Column="2">
-        <TextBlock Text="Output low" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
-        <Slider x:Name="OutputLowSlider" Value="{Binding OutputLow}" Minimum="0" Maximum="255" TickFrequency="1" IsSnapToTickEnabled="True"/>
-      </StackPanel>
-      
-      <StackPanel Grid.Row="3" Grid.Column="2">
-        <TextBlock Text="Opacity" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
-        <Slider x:Name="OpacitySlider" Value="{Binding Opacity}" Minimum="0" Maximum="255" TickFrequency="1" IsSnapToTickEnabled="True"/>
-      </StackPanel>
-      
-      <StackPanel Grid.Row="4" Grid.Column="2">
-        <TextBlock Text="Gamma" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
-        <Slider x:Name="GammaSlider" Value="{Binding Gamma}" Minimum="0.01" Maximum="0.45455" TickFrequency="0.002" IsSnapToTickEnabled="True"/>
-      </StackPanel>
-     
-      <Button HorizontalAlignment="Center" Command="{Binding SaveImageCommand}" Content="Save"/>
-  </Grid>
+    <Grid RowDefinitions="*,*,*,*,*" ColumnDefinitions="*,*,*">
+        
+        <!-- Load main -->
+        <StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" Orientation="Horizontal">
+            <Button HorizontalAlignment="Center" Command="{Binding LoadMainImageCommand}" Content="Upload main"/>
+            <Button HorizontalAlignment="Center" Command="{Binding RemoveMainImageCommand}" Content="X"/>
+        </StackPanel>
+
+        <!-- Load hidden -->
+        <StackPanel Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" Orientation="Horizontal">
+            <Button HorizontalAlignment="Center" Command="{Binding LoadHiddenImageCommand}" Content="Upload hidden"/>
+            <Button HorizontalAlignment="Center" Command="{Binding RemoveHiddenImageCommand}" Content="X"/>
+        </StackPanel>
+        
+        <!-- Save -->
+        <Button Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" Command="{Binding SaveImageCommand}" Content="Save"/>
+
+        <!-- Unedited main preview -->
+        <controls:ShaderImageControl Grid.Row="1" Grid.Column="0" InputShader="{Binding MainShader, Mode=OneWay}" ImageSize="{Binding MainScale}">
+            <Interaction.Behaviors>
+                <EventTriggerBehavior EventName="SizeChanged">
+                    <InvokeCommandAction Command="{Binding UpdateControlsScaleCommand}" PassEventArgsToCommand="True"></InvokeCommandAction>
+                </EventTriggerBehavior>
+            </Interaction.Behaviors>
+        </controls:ShaderImageControl>
+
+        <!-- Unedited hidden preview -->
+        <controls:ShaderImageControl Grid.Row="1" Grid.Column="1" InputShader="{Binding HiddenShader, Mode=OneWay}" ImageSize="{Binding HiddenScale}"/>
+
+        <!-- Output low preview -->
+        <controls:ShaderImageControl Grid.Row="2" Grid.Column="0" InputShader="{Binding OutputLowShader, Mode=OneWay}" ImageSize="{Binding MainScale}"/>
+
+        <!-- Negative preview -->
+        <controls:ShaderImageControl Grid.Row="2" Grid.Column="1" InputShader="{Binding NegativeShader, Mode=OneWay}" ImageSize="{Binding MainScale}"/>
+
+        <!-- Overlay preview -->
+        <controls:ShaderImageControl Grid.Row="3" Grid.Column="0" InputShader="{Binding OverlayShader, Mode=OneWay}" ImageSize="{Binding MainScale}"/>
+
+        <!-- Stitched preview -->
+        <controls:ShaderImageControl Grid.Row="4" Grid.Column="0" InputShader="{Binding StitchShader, Mode=OneWay}" ImageSize="{Binding MainScale}"/>
+
+        <!-- Gamma preview -->
+        <controls:ShaderImageControl Grid.Row="4" Grid.Column="1" InputShader="{Binding GammaShader, Mode=OneWay}" ImageSize="{Binding MainScale}"/>
+
+        <!-- Output low slider -->
+        <StackPanel Grid.Row="2" Grid.Column="2" VerticalAlignment="Center">
+            <TextBlock Text="Output low" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
+            <Slider Value="{Binding OutputLow}" Minimum="0" Maximum="255" TickFrequency="1" IsSnapToTickEnabled="True"/>
+        </StackPanel>
+
+        <!-- Opacity slider -->
+        <StackPanel Grid.Row="3" Grid.Column="2" VerticalAlignment="Center">
+            <TextBlock Text="Opacity" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
+            <Slider Value="{Binding Opacity}" Minimum="0" Maximum="255" TickFrequency="1" IsSnapToTickEnabled="True"/>
+        </StackPanel>
+
+        <!-- Gamma slider -->
+        <StackPanel Grid.Row="4" Grid.Column="2" VerticalAlignment="Center">
+            <TextBlock Text="Gamma" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
+            <Slider Value="{Binding Gamma}" Minimum="0.01" Maximum="0.45455" TickFrequency="0.002" IsSnapToTickEnabled="True"/>
+        </StackPanel>
+    </Grid>
 </UserControl>
