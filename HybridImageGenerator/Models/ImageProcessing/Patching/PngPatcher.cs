@@ -3,7 +3,7 @@ using System.Buffers.Binary;
 using System.IO;
 using System.IO.Hashing;
 
-namespace HybridImageGenerator.Models.Editor;
+namespace HybridImageGenerator.Models.ImageProcessing.Patching;
 
 public static class PngPatcher
 {
@@ -189,7 +189,5 @@ public static class PngPatcher
             return chunk;
         }
     }
-    
-    private class InvalidPngException(string message) : Exception(message);
 }
 

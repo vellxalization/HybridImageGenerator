@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using SkiaSharp;
 
-namespace HybridImageGenerator.Models.Editor;
+namespace HybridImageGenerator.Models.ImageProcessing.Saving;
 
 public class EditedImageSaver {
     private const int UnpremulRgba8888BytesPerPixel = 4;
@@ -129,5 +129,3 @@ public class EditedImageSaver {
     private static bool IsValidImage(SKImage image) => 
         image is { AlphaType: SKAlphaType.Unpremul, ColorType: SKColorType.Rgba8888 };
 }
-
-public class InvalidImageFormatException(string message) : Exception(message);

@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 
-namespace HybridImageGenerator.Models.Editor;
+namespace HybridImageGenerator.Models.ImageProcessing;
 
 public class ImageFileService(Func<IStorageProvider> storageProviderGetter) {
     private readonly FilePickerFileType[] _openFilter = 

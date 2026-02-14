@@ -5,8 +5,9 @@ using Avalonia;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using HybridImageGenerator.Models.Editor;
 using HybridImageGenerator.Models.ErrorHandling;
+using HybridImageGenerator.Models.ImageProcessing;
+using HybridImageGenerator.Models.ImageProcessing.Editor;
 using SkiaSharp;
 
 namespace HybridImageGenerator.ViewModels;
@@ -99,7 +100,7 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
             }
         }
         catch (Exception ex) {
-            bool isFatal = ex is ImageEditor.EditorNotInitialized;
+            bool isFatal = ex is EditorNotInitializedException;
             ErrorDetails details = new(isFatal, ex.Message, ex.StackTrace);
             await errorDispatcher.Invoke(details);
         }

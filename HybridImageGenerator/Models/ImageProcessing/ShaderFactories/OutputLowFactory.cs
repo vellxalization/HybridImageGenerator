@@ -1,6 +1,6 @@
 ﻿using SkiaSharp;
 
-namespace HybridImageGenerator.Models.Editor.ShaderFactories;
+namespace HybridImageGenerator.Models.ImageProcessing.ShaderFactories;
 
 public class OutputLowFactory(byte startingValue = 0) : ShaderFactory(SkSlShader) {
     public byte OutputLow { get; set; } = startingValue;

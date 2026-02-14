@@ -1,8 +1,8 @@
-﻿using System.Runtime.Versioning;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Browser;
-using HybridImageGenerator;
+
+namespace HybridImageGenerator.Browser;
 
 internal sealed partial class Program {
     private static Task Main(string[] args) => BuildAvaloniaApp()

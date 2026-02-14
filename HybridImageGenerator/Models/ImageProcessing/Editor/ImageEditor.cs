@@ -2,12 +2,14 @@
 using System.IO;
 using System.Threading.Tasks;
 using Avalonia;
-using HybridImageGenerator.Models.Editor.ShaderFactories;
+using HybridImageGenerator.Models.ImageProcessing.Patching;
+using HybridImageGenerator.Models.ImageProcessing.Saving;
+using HybridImageGenerator.Models.ImageProcessing.ShaderFactories;
 using SkiaSharp;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-namespace HybridImageGenerator.Models.Editor;
+namespace HybridImageGenerator.Models.ImageProcessing.Editor;
 
 public class ImageEditor(EditedImageSaver saver) {
     public bool Initialized { get; private set; }
@@ -243,11 +245,6 @@ public class ImageEditor(EditedImageSaver saver) {
 
     private void EnsureInitialized() {
         if (!Initialized)
-            throw new EditorNotInitialized();
+            throw new EditorNotInitializedException();
     }
-    
-    public class EditorNotInitialized() : Exception("The editor is not initialized");
-    
-    
-    private class SkiaObjectInvalidStateException(string message) : Exception(message);
 }

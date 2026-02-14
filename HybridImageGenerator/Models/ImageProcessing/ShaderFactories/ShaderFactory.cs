@@ -1,7 +1,7 @@
 ﻿using System;
 using SkiaSharp;
 
-namespace HybridImageGenerator.Models.Editor.ShaderFactories;
+namespace HybridImageGenerator.Models.ImageProcessing.ShaderFactories;
 
 public abstract class ShaderFactory : IDisposable {
     protected readonly SKRuntimeEffect Effect;
