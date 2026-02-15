@@ -20,7 +20,6 @@
         <Style Selector="Border.StyledBorder">
             <Setter Property="BorderBrush" Value="#80FFFFFF"/>
             <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="Padding" Value="10"/>
             <Setter Property="Background" Value="#12161F"/>
         </Style>
         <Style Selector="Slider:horizontal /template/ Thumb">
@@ -30,11 +29,15 @@
         <Style Selector="Button">
             <Setter Property="CornerRadius" Value="5"/>
         </Style>
+        <Style Selector="Slider:horizontal /template/ RepeatButton /template/ Border">
+            <Setter Property="Height" Value="5" />
+            <!-- <Setter Property="CornerRadius" Value="5" /> -->
+        </Style>
     </UserControl.Styles>
     
-    <Grid Margin="20" ColumnSpacing="20" ColumnDefinitions="3*, *">
-        <Border Classes="StyledBorder" Grid.Column="0" BorderThickness="1">
-            <Grid RowDefinitions="*,*,*,*,*" ColumnDefinitions="*,*" RowSpacing="5">
+    <Grid Margin="20" ColumnSpacing="20" ColumnDefinitions="*, 3*">
+        <Border Classes="StyledBorder" Grid.Column="1" BorderThickness="1">
+            <Grid RowDefinitions="5*,10*,10*,10*,10*,5*" ColumnDefinitions="*,*" RowSpacing="5">
                 <!-- Load main --> 
                 <StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" Orientation="Horizontal">
                     <Button HorizontalAlignment="Center" Command="{Binding LoadMainImageCommand}" Content="Upload main"/>
@@ -75,28 +78,34 @@
                 <controls:ShaderImageControl Grid.Row="4" Grid.Column="1" InputShader="{Binding GammaShader, Mode=OneWay}" ImageSize="{Binding MainScale}"/>
             </Grid>
         </Border>
-        <Border Classes="StyledBorder" Grid.Column="1" BorderThickness="1">
-            <Grid RowDefinitions="*,*,*,*,*">
-                <!-- Save -->
-                <Button Grid.Row="0" HorizontalAlignment="Center" Command="{Binding SaveImageCommand}" Content="Save"/>
-            
+        <Border Classes="StyledBorder" Grid.Column="0" BorderThickness="1">
+            <Grid RowDefinitions="5*,10*,10*,10*,10*,5*">
                 <!-- Output low slider -->
-                <StackPanel Grid.Row="2" VerticalAlignment="Center">
-                    <TextBlock Text="Output low" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
-                    <Slider Value="{Binding OutputLow}" Minimum="0" Maximum="255" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                </StackPanel>
+                <Border Grid.Row="2" BorderThickness="0, 1, 0, 1" BorderBrush="#20FFFFFF">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Output low" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
+                        <Slider Margin="15, 0, 15, 0" Value="{Binding OutputLow}" Minimum="0" Maximum="255" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                    </StackPanel>
+                </Border>
 
                 <!-- Opacity slider -->
-                <StackPanel Grid.Row="3" VerticalAlignment="Center">
-                    <TextBlock Text="Opacity" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
-                    <Slider Value="{Binding Opacity}" Minimum="0" Maximum="255" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                </StackPanel>
+                <Border Grid.Row="3" BorderThickness="0, 0, 0, 1" BorderBrush="#20FFFFFF">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Opacity" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
+                        <Slider Margin="15, 0, 15, 0" Value="{Binding Opacity}" Minimum="0" Maximum="255" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                    </StackPanel>
+                </Border>
 
                 <!-- Gamma slider -->
-                <StackPanel Grid.Row="4" VerticalAlignment="Center">
-                    <TextBlock Text="Gamma" Foreground="White" FontSize="16"/>
-                    <Slider Value="{Binding Gamma}" Minimum="0.01" Maximum="0.45455" TickFrequency="0.002" IsSnapToTickEnabled="True"/>
-                </StackPanel>
+                <Border Grid.Row="4">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Gamma" Foreground="White" FontSize="16" Margin="40,0,0,10"/>
+                        <Slider Margin="15, 0, 15, 0" Value="{Binding Gamma}" Minimum="0.01" Maximum="0.45455" TickFrequency="0.002" IsSnapToTickEnabled="True"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Save -->
+                <Button Grid.Row="5" Margin="50, 0, 50, 0" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Command="{Binding SaveImageCommand}" Content="Save"/>
             </Grid>
         </Border>
     </Grid>
