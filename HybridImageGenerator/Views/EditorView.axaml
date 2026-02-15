@@ -8,7 +8,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="HybridImageGenerator.Views.EditorView"
              x:DataType="viewModels:EditorViewModel"
-             Background="#0A0D12">
+             Background="#090C11">
     
     <Interaction.Behaviors>
         <EventTriggerBehavior EventName="Loaded">
@@ -23,27 +23,19 @@
             <Setter Property="Padding" Value="10"/>
             <Setter Property="Background" Value="#12161F"/>
         </Style>
-        <Style Selector="Slider">
-            <Setter Property="Background" Value="#20242D"/>
-            <Setter Property="Foreground" Value="#11CDE6"/>
-            <Style Selector="^:horizontal">
-                <Style Selector="^ /template/ Thumb">
-                    <Setter Property="Width" Value="10"/>
-                    <Setter Property="Height" Value="10"/>
-                    <Setter Property="Background" Value="#11CDE6"/>
-                </Style>
-                <Style Selector="^ /template/ RepeatButton#PART_DecreaseButton">
-                    <Setter Property="Background" Value="#11CDE6" />
-                </Style>
-            </Style>
-                
+        <Style Selector="Slider:horizontal /template/ Thumb">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Height" Value="10"/>
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="CornerRadius" Value="5"/>
         </Style>
     </UserControl.Styles>
     
     <Grid Margin="20" ColumnSpacing="20" ColumnDefinitions="3*, *">
         <Border Classes="StyledBorder" Grid.Column="0" BorderThickness="1">
-            <Grid RowDefinitions="*,*,*,*,*" ColumnDefinitions="*,*">
-                <!-- Load main -->
+            <Grid RowDefinitions="*,*,*,*,*" ColumnDefinitions="*,*" RowSpacing="5">
+                <!-- Load main --> 
                 <StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" Orientation="Horizontal">
                     <Button HorizontalAlignment="Center" Command="{Binding LoadMainImageCommand}" Content="Upload main"/>
                     <Button HorizontalAlignment="Center" Command="{Binding RemoveMainImageCommand}" Content="X"/>

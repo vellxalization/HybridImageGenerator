@@ -12,4 +12,21 @@
     <Application.Styles>
         <FluentTheme />
     </Application.Styles>
+             
+    <Application.Resources>
+        <!-- Sliders -->
+        <SolidColorBrush x:Key="SliderThumbBackground" Color="#6366F1"/>
+        <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="#6366F1"/>
+        <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="#6366F1"/>
+        <SolidColorBrush x:Key="SliderTrackValueFill" Color="#6366F1"/>
+        <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#6366F1"/>
+        <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#6366F1"/>
+        <SolidColorBrush x:Key="SliderTrackFill" Color="#2D3748"/>
+        
+        <SolidColorBrush x:Key="ButtonBackground" Color="#6366F1 "/>
+        <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#2D3748"/>
+        
+        
+        
+    </Application.Resources>
 </Application>
