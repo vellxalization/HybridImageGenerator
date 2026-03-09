@@ -23,8 +23,8 @@
             <Setter Property="Background" Value="#12161F"/>
         </Style>
         <Style Selector="Slider:horizontal /template/ Thumb">
-            <Setter Property="Width" Value="10"/>
-            <Setter Property="Height" Value="10"/>
+            <Setter Property="Width" Value="15"/>
+            <Setter Property="Height" Value="15"/>
         </Style>
         <Style Selector="Button">
             <Setter Property="CornerRadius" Value="5"/>
