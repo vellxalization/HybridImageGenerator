@@ -5,7 +5,7 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
-using HybridImageGenerator.Models.ErrorHandling;
+using HybridImageGenerator.Models;
 using HybridImageGenerator.Models.ImageProcessing;
 using HybridImageGenerator.Models.ImageProcessing.Editor;
 using HybridImageGenerator.Models.ImageProcessing.Saving;
@@ -34,30 +34,30 @@ public partial class App : Application {
     }
 
     private static MainWindow CreateDesktopMainWindow() {
-        ErrorDispatcher dispatcher = new();
         ImageEditor editor = new(new EditedImageSaver());
         
         MainWindow mainWindow = new();
         ImageFileService imageFileService = new(StorageProviderGetter);
-        EditorViewModel editorViewModel = new(imageFileService, editor, dispatcher);
-        mainWindow.DataContext = new MainViewModel(editorViewModel, new DesktopErrorViewModel(dispatcher));
+        EditorViewModel editorViewModel = new(imageFileService, editor, ErrorVmCreator);
+        mainWindow.DataContext = new MainViewModel(editorViewModel);
         
         return mainWindow;
         
         IStorageProvider StorageProviderGetter() => mainWindow.StorageProvider;
+        ErrorViewModel ErrorVmCreator(ErrorDetails details) => new DesktopErrorViewModel(details);
     }
     
     private static MainView CreateWebMainView() {
-        ErrorDispatcher dispatcher = new();
         ImageEditor editor = new(new EditedImageSaver());
         
         MainView mainView = new();
         ImageFileService imageFileService = new(StorageProviderGetter);
-        EditorViewModel editorViewModel = new(imageFileService, editor, dispatcher);
-        mainView.DataContext = new MainViewModel(editorViewModel, new WebErrorViewModel(dispatcher));
+        EditorViewModel editorViewModel = new(imageFileService, editor, ErrorVmCreator);
+        mainView.DataContext = new MainViewModel(editorViewModel);
         
         return mainView;
         
+        ErrorViewModel ErrorVmCreator(ErrorDetails details) => new WebErrorViewModel(details);
         IStorageProvider StorageProviderGetter() => TopLevel.GetTopLevel(mainView)!.StorageProvider;
     }
     

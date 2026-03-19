@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:HybridImageGenerator.ViewModels"
              xmlns:views="clr-namespace:HybridImageGenerator.Views"
+             xmlns:dialogHostAvalonia="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="HybridImageGenerator.Views.MainView"
              x:DataType="vm:MainViewModel"
@@ -13,10 +14,7 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
     <vm:MainViewModel />
   </Design.DataContext>
-    <Grid>
+    <dialogHostAvalonia:DialogHost Identifier="MainDialogHost">
         <views:EditorView DataContext="{Binding EditorViewModel}"></views:EditorView>
-        <Panel Background="#80000000" IsVisible="{Binding ErrorViewModel.IsVisible}">
-            <views:ErrorView HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DataContext="{Binding ErrorViewModel}"></views:ErrorView>
-        </Panel>
-    </Grid>
+    </dialogHostAvalonia:DialogHost>
 </UserControl>
