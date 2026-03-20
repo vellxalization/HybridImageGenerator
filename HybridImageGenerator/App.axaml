@@ -4,6 +4,7 @@
              xmlns:dialogHostAvalonia="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
              xmlns:views="clr-namespace:HybridImageGenerator.Views"
              xmlns:errorHandling="clr-namespace:HybridImageGenerator.ViewModels.ErrorHandling"
+             xmlns:viewModels="clr-namespace:HybridImageGenerator.ViewModels"
              x:Class="HybridImageGenerator.App"
              RequestedThemeVariant="Default">
     
@@ -12,6 +13,7 @@
     <Application.DataTemplates>
         <DataTemplate DataType="{x:Type errorHandling:DesktopErrorViewModel}"><views:ErrorView /></DataTemplate>
         <DataTemplate DataType="{x:Type errorHandling:WebErrorViewModel}"><views:ErrorView /></DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:RescaleWarningViewModel}"><views:RescaleWarningView /></DataTemplate>
         <local:ViewLocator/>
     </Application.DataTemplates>
 
