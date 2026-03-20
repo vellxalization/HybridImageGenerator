@@ -5,14 +5,16 @@ using Avalonia;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using HybridImageGenerator.Models.ErrorHandling;
+using DialogHostAvalonia;
+using HybridImageGenerator.Models;
 using HybridImageGenerator.Models.ImageProcessing;
 using HybridImageGenerator.Models.ImageProcessing.Editor;
+using HybridImageGenerator.ViewModels.ErrorHandling;
 using SkiaSharp;
 
 namespace HybridImageGenerator.ViewModels;
 
-public partial class EditorViewModel(ImageFileService fileService, ImageEditor editor, ErrorDispatcher errorDispatcher)
+public partial class EditorViewModel(ImageFileService fileService, ImageEditor editor, Func<ErrorDetails, ErrorViewModel> errorVmCreator)
     : ViewModelBase {
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveImageCommand))]
@@ -75,12 +77,12 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
             SKImage? image = SKImage.FromEncodedData(memoryStream);
             if (!editor.TrySetMainImage(image, out string? error)) {
                 ErrorDetails details = new(false, error!);
-                await errorDispatcher.Invoke(details);
+                await DialogHost.Show(errorVmCreator(details));
             }
         }
         catch (Exception ex) {
             ErrorDetails details = new(false, ex.Message, ex.StackTrace);
-            await errorDispatcher.Invoke(details);
+            await DialogHost.Show(errorVmCreator(details));
         }
     }
     
@@ -96,13 +98,13 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
             SKImage? image = SKImage.FromEncodedData(memoryStream);
             if (!editor.TrySetHiddenImage(image, out string? error)) {
                 ErrorDetails details = new(false, error!);
-                await errorDispatcher.Invoke(details);
+                await DialogHost.Show(errorVmCreator(details));
             }
         }
         catch (Exception ex) {
             bool isFatal = ex is EditorNotInitializedException;
             ErrorDetails details = new(isFatal, ex.Message, ex.StackTrace);
-            await errorDispatcher.Invoke(details);
+            await DialogHost.Show(errorVmCreator(details));
         }
     }
     
@@ -118,7 +120,7 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
         }
         catch (Exception ex) {
             ErrorDetails details = new(false, ex.Message, ex.StackTrace);
-            await errorDispatcher.Invoke(details);
+            await DialogHost.Show(errorVmCreator(details));
         }
     }
 
@@ -147,7 +149,7 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
         }
         catch (Exception ex) {
             ErrorDetails details = new(true, ex.Message, ex.StackTrace);
-            await errorDispatcher.Invoke(details);
+            await DialogHost.Show(errorVmCreator(details));
             return;
         }
         

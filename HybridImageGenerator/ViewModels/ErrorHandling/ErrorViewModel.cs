@@ -1,13 +1,13 @@
-﻿using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using HybridImageGenerator.Models.ErrorHandling;
+using DialogHostAvalonia;
+using HybridImageGenerator.Models;
 
 namespace HybridImageGenerator.ViewModels.ErrorHandling;
 
 public abstract partial class ErrorViewModel : ViewModelBase {
     [ObservableProperty]
-    private string _message = "";
+    private string _message;
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ShowStackTraceSwitchCommand))]
     private string? _stackTrace;
@@ -21,23 +21,14 @@ public abstract partial class ErrorViewModel : ViewModelBase {
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ContinueCommand))]
     private bool _isFatalError;
-    private TaskCompletionSource? _currentErrorTsc;
     
-    protected ErrorViewModel(ErrorDispatcher errorDispatcher, string criticalButtonText) {
+    protected ErrorViewModel(string criticalButtonText, ErrorDetails details) {
         _criticalButtonText = criticalButtonText;
-        errorDispatcher.ErrorOccured += HandleIncomingError;
+        _isFatalError = details.IsFatal;
+        _message = details.Message;
+        _stackTrace = details.StackTrace;
     }
-
-    private void HandleIncomingError(object? sender, (ErrorDetails details, TaskCompletionSource tsc) args) {
-        IsVisible = true;
-        _currentErrorTsc = args.tsc;
-        
-        ErrorDetails details = args.details;
-        IsFatalError = details.IsFatal;
-        Message = details.Message;
-        StackTrace = details.StackTrace;
-    }
-
+    
     [RelayCommand(CanExecute=nameof(CanShowStackTrace))]
     private void ShowStackTraceSwitch() => StackTraceVisible = !StackTraceVisible;
 
@@ -45,8 +36,7 @@ public abstract partial class ErrorViewModel : ViewModelBase {
 
     [RelayCommand(CanExecute=nameof(CanContinue))]
     private void Continue() {
-        _currentErrorTsc?.SetResult();
-        IsVisible = false;
+        DialogHost.GetDialogSession("MainDialogHost")?.Close();
     }
 
     private bool CanContinue() => !IsFatalError;
