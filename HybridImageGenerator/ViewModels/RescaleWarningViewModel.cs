@@ -5,7 +5,13 @@ using HybridImageGenerator.Models;
 
 namespace HybridImageGenerator.ViewModels;
 
-public partial class RescaleWarningViewModel : ViewModelBase {
+public partial class RescaleWarningViewModel(int imageWidth, int imageHeight, int maxWidth, int maxHeight) : ViewModelBase {
+    
+    private const string WarningMessageFormat = "Image ({0}x{1} pixels) will be shrinked down to {2}x{3} pixels";
+    
+    [ObservableProperty]
+    private string _warningMessage 
+        = string.Format(WarningMessageFormat, imageWidth, imageHeight, maxWidth, maxHeight);
     [ObservableProperty]
     private bool _dontShowForThisSize;
     

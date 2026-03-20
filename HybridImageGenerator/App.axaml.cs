@@ -16,6 +16,13 @@ using HybridImageGenerator.Views;
 namespace HybridImageGenerator;
 
 public partial class App : Application {
+    private const int VerticalTaskBarWidth = 70; // because some win10 folks can use vertical sidebar
+    private const int HorizontalTaskBarHeight = 60; // this should cover most taskbars on win10 and 11
+
+    // we target default desktop discord client on 1920x1080 fullscreen
+    private const int DefaultDiscordPCFullScreenInnerWidth = 1920 - VerticalTaskBarWidth;
+    private const int DefaultDiscordPCFullScreenInnerHeight = 1080 - HorizontalTaskBarHeight;
+    
     public override void Initialize() {
         AvaloniaXamlLoader.Load(this);
     }
@@ -35,10 +42,11 @@ public partial class App : Application {
 
     private static MainWindow CreateDesktopMainWindow() {
         ImageEditor editor = new(new EditedImageSaver());
+        DiscordFullScreenRescaler rescaler = new(DefaultDiscordPCFullScreenInnerWidth, DefaultDiscordPCFullScreenInnerHeight);
         
         MainWindow mainWindow = new();
         ImageFileService imageFileService = new(StorageProviderGetter);
-        EditorViewModel editorViewModel = new(imageFileService, editor, ErrorVmCreator);
+        EditorViewModel editorViewModel = new(imageFileService, editor, rescaler, ErrorVmCreator);
         mainWindow.DataContext = new MainViewModel(editorViewModel);
         
         return mainWindow;
@@ -49,10 +57,11 @@ public partial class App : Application {
     
     private static MainView CreateWebMainView() {
         ImageEditor editor = new(new EditedImageSaver());
+        DiscordFullScreenRescaler rescaler = new(DefaultDiscordPCFullScreenInnerWidth, DefaultDiscordPCFullScreenInnerHeight);
         
         MainView mainView = new();
         ImageFileService imageFileService = new(StorageProviderGetter);
-        EditorViewModel editorViewModel = new(imageFileService, editor, ErrorVmCreator);
+        EditorViewModel editorViewModel = new(imageFileService, editor, rescaler, ErrorVmCreator);
         mainView.DataContext = new MainViewModel(editorViewModel);
         
         return mainView;

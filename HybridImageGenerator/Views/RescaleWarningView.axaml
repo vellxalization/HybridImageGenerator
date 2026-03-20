@@ -8,7 +8,7 @@
              x:DataType="viewModels:RescaleWarningViewModel">
     
     <Grid ColumnDefinitions="*, *" RowDefinitions="*, *, *">
-        <TextBox Grid.ColumnSpan="2">Test</TextBox>
+        <TextBox Grid.ColumnSpan="2" TextWrapping="Wrap" Text="{Binding WarningMessage}"></TextBox>
         <CheckBox Grid.Column="0" Grid.Row="1" IsChecked="{Binding DontShowForThisSize}">Don't show again for current size</CheckBox>
         <Button Grid.Row="2" Grid.Column="0" Command="{Binding OkCommand}">Ok</Button>
         <Button Grid.Row="2" Grid.Column="1" Command="{Binding CancelCommand}">Cancel</Button>

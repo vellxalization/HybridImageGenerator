@@ -14,8 +14,9 @@ using SkiaSharp;
 
 namespace HybridImageGenerator.ViewModels;
 
-public partial class EditorViewModel(ImageFileService fileService, ImageEditor editor, Func<ErrorDetails, ErrorViewModel> errorVmCreator)
-    : ViewModelBase {
+public partial class EditorViewModel(ImageFileService fileService, ImageEditor editor, DiscordFullScreenRescaler rescaler, 
+    Func<ErrorDetails, ErrorViewModel> errorVmCreator) : ViewModelBase {
+    
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveImageCommand))]
     [NotifyCanExecuteChangedFor(nameof(RemoveMainImageCommand))]
@@ -50,6 +51,8 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     [ObservableProperty]
     private Size _controlsSize;
 
+    private bool _checkRescale = true;
+
     partial void OnOutputLowChanged(byte value) {
         if (editor.Initialized)
             editor.OutputLow = value;
@@ -75,6 +78,12 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
             await file.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
             SKImage? image = SKImage.FromEncodedData(memoryStream);
+
+            if (!(await CheckRescaling(image.Width, image.Height))) {
+                image.Dispose();
+                return;
+            }
+            
             if (!editor.TrySetMainImage(image, out string? error)) {
                 ErrorDetails details = new(false, error!);
                 await DialogHost.Show(errorVmCreator(details));
@@ -84,6 +93,21 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
             ErrorDetails details = new(false, ex.Message, ex.StackTrace);
             await DialogHost.Show(errorVmCreator(details));
         }
+    }
+
+    private async Task<bool> CheckRescaling(int imageWidth, int imageHeight) {
+        if (!_checkRescale)
+            return true;
+        
+        (int rescaledWidth, int rescaledHeight) rescaled = rescaler.Rescale(imageWidth, imageHeight);
+        if (rescaled == (imageWidth, imageHeight))
+            return true;
+        
+        RescaleWarningViewModel viewModel = new RescaleWarningViewModel(imageWidth, imageHeight, rescaled.rescaledWidth, rescaled.rescaledHeight);
+        RescaleWarningResponse response = (RescaleWarningResponse)(await DialogHost.Show(viewModel))!;
+        _checkRescale = !response.DontShowForThisSize;
+        
+        return !response.LoadingCancelled;
     }
     
     [RelayCommand]
