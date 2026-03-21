@@ -51,6 +51,8 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     [ObservableProperty]
     private Size _controlsSize;
 
+    [ObservableProperty]
+    private bool _useSafeZones = true;
     private bool _checkRescale = true;
 
     partial void OnOutputLowChanged(byte value) {
@@ -96,7 +98,7 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     }
 
     private async Task<bool> CheckRescaling(int imageWidth, int imageHeight) {
-        if (!_checkRescale)
+        if (!UseSafeZones || !_checkRescale)
             return true;
         
         (int rescaledWidth, int rescaledHeight) rescaled = rescaler.Rescale(imageWidth, imageHeight);
