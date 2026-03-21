@@ -197,4 +197,9 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
         
         editor.SetRenderSize(args.NewSize);
     }
+
+    [RelayCommand]
+    private async Task ShowSafeZoneToolTip() {
+        await DialogHost.Show(new SafeZoneToolTipViewModel(), "MainDialogHost");
+    }
 }

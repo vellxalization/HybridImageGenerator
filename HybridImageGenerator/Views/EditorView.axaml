@@ -80,6 +80,16 @@
         </Border>
         <Border Classes="StyledBorder" Grid.Column="0" BorderThickness="1">
             <Grid RowDefinitions="5*,10*,10*,10*,10*,5*">
+                <!-- Safe zone tool -->
+                <Border Grid.Row="0" BorderThickness="0, 1, 0, 1" BorderBrush="#20FFFFFF">
+                    <StackPanel VerticalAlignment="Center">
+                        <CheckBox>Use Discord safe zone limits</CheckBox>
+                        <Button CornerRadius="100" Command="{Binding ShowSafeZoneToolTipCommand}">?</Button>
+                        <TextBox>1920</TextBox>
+                        <TextBox>1080</TextBox>
+                    </StackPanel>
+                </Border>
+                
                 <!-- Output low slider -->
                 <Border Grid.Row="2" BorderThickness="0, 1, 0, 1" BorderBrush="#20FFFFFF">
                     <StackPanel VerticalAlignment="Center">
