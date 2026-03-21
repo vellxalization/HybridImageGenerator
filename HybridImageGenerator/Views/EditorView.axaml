@@ -85,8 +85,8 @@
                     <StackPanel VerticalAlignment="Center">
                         <CheckBox IsChecked="{Binding UseSafeZones}">Use Discord safe zone limits</CheckBox>
                         <Button IsEnabled="{Binding UseSafeZones}" CornerRadius="100" Command="{Binding ShowSafeZoneToolTipCommand}">?</Button>
-                        <TextBox IsEnabled="{Binding UseSafeZones}">1920</TextBox>
-                        <TextBox IsEnabled="{Binding UseSafeZones}">1080</TextBox>
+                        <controls:NumberOnlyTextBox IsEnabled="{Binding UseSafeZones}"></controls:NumberOnlyTextBox>
+                        <controls:NumberOnlyTextBox IsEnabled="{Binding UseSafeZones}"></controls:NumberOnlyTextBox>
                     </StackPanel>
                 </Border>
                 
