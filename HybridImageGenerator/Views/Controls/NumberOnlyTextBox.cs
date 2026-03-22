@@ -21,7 +21,6 @@ public class NumberOnlyTextBox : TextBox {
     }
 
     private async void OnPaste(object? sender, RoutedEventArgs args) {
-        // TODO: handle case when the Text is "0"
         args.Handled = true; // suppress paste event until we verify it
         
         var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
@@ -36,8 +35,15 @@ public class NumberOnlyTextBox : TextBox {
         if (text is null) return;
         if (!text.All(char.IsDigit)) return;
         if (!ushort.TryParse(Text!.Insert(CaretIndex, text), out var result)) return;
-
         Value = result;
+        
+        if (Text is "0") {
+            string trimmed = text.TrimStart('0');
+            Text = text.TrimStart('0');
+            CaretIndex += trimmed.Length;
+            return;
+        }
+            
         args.Handled = false;
     }
     
