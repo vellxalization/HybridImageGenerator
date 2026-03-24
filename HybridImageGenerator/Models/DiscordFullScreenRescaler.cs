@@ -9,7 +9,10 @@ public class DiscordFullScreenRescaler(int innerWindowWidth, int innerWindowHeig
     private const int SecondVerticalPadding = 36; // f
     // i have no idea what these paddings are but discord
     // uses them to determine the new size of a picture
-    
+
+    public int InnerWindowWidth => innerWindowWidth;
+    public int InnerWindowHeight => innerWindowHeight;
+
     public (int rescaledWidth, int rescaledHeight) Rescale(int imageWidth, int imageHeight) {
         int firstWidth = innerWindowWidth - FirstHorizontalPadding * 2;
         int secondWidth = innerWindowWidth - SecondHorizontalPadding * 2;

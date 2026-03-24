@@ -53,7 +53,13 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
 
     [ObservableProperty]
     private bool _useSafeZones = true;
+    [ObservableProperty]
+    private ushort _innerWidth;
+    [ObservableProperty]
+    private ushort _innerHeight;
+    
     private bool _checkRescale = true;
+    private DiscordFullScreenRescaler _rescaler = rescaler;
 
     partial void OnOutputLowChanged(byte value) {
         if (editor.Initialized)
@@ -101,7 +107,7 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
         if (!UseSafeZones || !_checkRescale)
             return true;
         
-        (int rescaledWidth, int rescaledHeight) rescaled = rescaler.Rescale(imageWidth, imageHeight);
+        (int rescaledWidth, int rescaledHeight) rescaled = _rescaler.Rescale(imageWidth, imageHeight);
         if (rescaled == (imageWidth, imageHeight))
             return true;
         
@@ -203,5 +209,12 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     [RelayCommand]
     private async Task ShowSafeZoneToolTip() {
         await DialogHost.Show(new SafeZoneToolTipViewModel(), "MainDialogHost");
+    }
+    
+    [RelayCommand]
+    private void UpdateRescalerIfNeeded() {
+        if (InnerHeight == _rescaler.InnerWindowHeight && InnerWidth == _rescaler.InnerWindowWidth) return;
+
+        _rescaler = new DiscordFullScreenRescaler(InnerWidth, InnerHeight);
     }
 }
