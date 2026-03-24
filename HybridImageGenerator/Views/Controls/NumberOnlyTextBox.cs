@@ -2,6 +2,7 @@
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
@@ -12,7 +13,7 @@ public class NumberOnlyTextBox : TextBox {
     protected override Type StyleKeyOverride => typeof(TextBox);
     
     public static readonly StyledProperty<ushort> ValueProperty =
-        AvaloniaProperty.Register<NumberOnlyTextBox, ushort>(nameof(Value));
+        AvaloniaProperty.Register<NumberOnlyTextBox, ushort>(nameof(Value), defaultBindingMode: BindingMode.TwoWay);
 
     public ushort Value {
         get => GetValue(ValueProperty);
