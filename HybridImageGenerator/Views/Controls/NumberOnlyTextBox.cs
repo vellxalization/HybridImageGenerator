@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
@@ -10,9 +11,12 @@ namespace HybridImageGenerator.Views.Controls;
 public class NumberOnlyTextBox : TextBox {
     protected override Type StyleKeyOverride => typeof(TextBox);
     
+    public static readonly StyledProperty<ushort> ValueProperty =
+        AvaloniaProperty.Register<NumberOnlyTextBox, ushort>(nameof(Value));
+
     public ushort Value {
-        get;
-        private set;
+        get => GetValue(ValueProperty);
+        set => SetValue(ValueProperty, value);
     }
 
     public NumberOnlyTextBox() {
@@ -20,54 +24,85 @@ public class NumberOnlyTextBox : TextBox {
         Text = "0";
     }
 
-    private async void OnPaste(object? sender, RoutedEventArgs args) {
-        args.Handled = true; // suppress paste event until we verify it
+    private async void OnPaste(object? sender, RoutedEventArgs e) {
+        e.Handled = true;
         
-        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
-        if (clipboard == null) return;
-        
-        string? text = null;
+        IClipboard? clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+        if (clipboard is null) return;
+
+        string? clipboardText = null;
         try {
-            text = await clipboard.TryGetTextAsync();
-        }
-        catch (TimeoutException) { } // suppress
-        
-        if (text is null) return;
-        if (!text.All(char.IsDigit)) return;
-        if (!ushort.TryParse(Text!.Insert(CaretIndex, text), out var result)) return;
-        Value = result;
-        
-        if (Text is "0") {
-            string trimmed = text.TrimStart('0');
-            Text = text.TrimStart('0');
-            CaretIndex += trimmed.Length;
+            clipboardText = await clipboard.TryGetTextAsync();
+        } catch (TimeoutException) {} // suppress
+
+        if (!TryInsertInput(clipboardText, out string result))
             return;
-        }
-            
-        args.Handled = false;
+        
+        Text = result;
+        UpdateCaret(Math.Min(SelectionStart, SelectionEnd) + clipboardText!.Length);
+    }
+
+    private void UpdateCaret(int newPos) {
+        if (CaretIndex == newPos)
+            CaretIndex = newPos == 0 ? 1 : 0; // guarantee that the caret will be updated
+
+        CaretIndex = SelectionEnd = SelectionStart = newPos;
     }
     
     protected override void OnTextInput(TextInputEventArgs e) {
-        if (string.IsNullOrWhiteSpace(e.Text)) return;
-        if (e.Text.Length > 1 || !char.IsDigit(e.Text[0])) return;
-        
-        string currentText = Text ?? "";
-        if (!ushort.TryParse(currentText.Insert(CaretIndex, e.Text), out ushort result)) return;
-        
-        base.OnTextInput(e);
-        if (Text!.StartsWith('0'))
-            Text = Text[1..];
-        
-        Value = result;
+        if (TryInsertInput(e.Text, out _)) 
+            base.OnTextInput(e);
+        else
+            e.Handled = true;
     }
 
-    protected override void OnKeyDown(KeyEventArgs e) {
-        base.OnKeyDown(e);
+    private bool TryInsertInput(string? input, out string result) {
+        result = Text ?? "";
+        if (string.IsNullOrEmpty(input)) return false;
+        if (!input.All(char.IsDigit)) return false;
         
-        if (e.Key is not (Key.Back or Key.Delete)) return;
-        if (Text != string.Empty) return;
+        bool selectionActive = SelectionStart != SelectionEnd;
+        if (selectionActive) {
+            (int start, int length) selection = GetSelectionRange();
+            result = result.Remove(selection.start, selection.length).Insert(selection.start, input);
+        }
+        else
+            result = result.Insert(CaretIndex, input);
         
-        Text = "0"; 
-        CaretIndex = 1;
+        return ushort.TryParse(result, out _);
+    }
+    
+    private (int start, int length) GetSelectionRange() 
+        => (Math.Min(SelectionStart, SelectionEnd), Math.Abs(SelectionEnd - SelectionStart));
+
+    protected override void OnLostFocus(RoutedEventArgs e) {
+        base.OnLostFocus(e);
+
+        string text = Text ?? string.Empty;
+        bool needTrimming = text.StartsWith('0');
+        if (text is "0" || (!needTrimming && (text is not ""))) return;
+
+        string trimmed = text.TrimStart('0');
+        Text = trimmed is "" ? "0" : trimmed;
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
+        base.OnPropertyChanged(change);
+        
+        if (change.Property == TextProperty) {
+            ushort result;
+            if (string.IsNullOrEmpty(Text))
+                result = 0;
+            else if (!ushort.TryParse(Text, out result)) 
+                return;
+
+            if (Value != result) 
+                Value = result;
+        }
+        else if (change.Property == ValueProperty) {
+            ushort newValue = change.GetNewValue<ushort>();
+            if (!ushort.TryParse(Text, out ushort currentTextValue) || currentTextValue != newValue)
+                Text = newValue.ToString();
+        }
     }
 }
