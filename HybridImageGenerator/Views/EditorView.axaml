@@ -35,6 +35,7 @@
         </Style>
     </UserControl.Styles>
     
+    <!--> Images <-->
     <Grid Margin="20" ColumnSpacing="20" ColumnDefinitions="*, 3*">
         <Border Classes="StyledBorder" Grid.Column="1" BorderThickness="1">
             <Grid RowDefinitions="5*,10*,10*,10*,10*,5*" ColumnDefinitions="*,*" RowSpacing="5">
@@ -78,16 +79,43 @@
                 <controls:ShaderImageControl Grid.Row="4" Grid.Column="1" InputShader="{Binding GammaShader, Mode=OneWay}" ImageSize="{Binding MainScale}"/>
             </Grid>
         </Border>
+        <!-- Tools -->
         <Border Classes="StyledBorder" Grid.Column="0" BorderThickness="1">
             <Grid RowDefinitions="5*,10*,10*,10*,10*,5*">
                 <!-- Safe zone tool -->
-                <Border Grid.Row="0" BorderThickness="0, 1, 0, 1" BorderBrush="#20FFFFFF">
-                    <StackPanel VerticalAlignment="Center">
-                        <CheckBox IsChecked="{Binding UseSafeZones}">Use Discord safe zone limits</CheckBox>
-                        <Button IsEnabled="{Binding UseSafeZones}" CornerRadius="100" Command="{Binding ShowSafeZoneToolTipCommand}">?</Button>
-                        <controls:NumberOnlyTextBox IsEnabled="{Binding UseSafeZones}"></controls:NumberOnlyTextBox>
-                        <controls:NumberOnlyTextBox IsEnabled="{Binding UseSafeZones}"></controls:NumberOnlyTextBox>
-                    </StackPanel>
+                <Border Padding="15, 0, 15, 0" Grid.Row="0" Grid.RowSpan="2" BorderThickness="0, 1, 0, 1" BorderBrush="#20FFFFFF">
+                    <Grid RowDefinitions="*,*,*,*" ColumnDefinitions="*,*">
+                        <DockPanel Grid.ColumnSpan="2">
+                            <Button DockPanel.Dock="Right" HorizontalAlignment="Right" IsEnabled="{Binding UseSafeZones}" CornerRadius="100" Command="{Binding ShowSafeZoneToolTipCommand}">?</Button>
+                            <CheckBox IsChecked="{Binding UseSafeZones}" VerticalAlignment="Center">Use Discord safe zone limits</CheckBox>
+                        </DockPanel>
+                        
+                        <!--> Width input <-->
+                        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 0, 0, 15" Spacing="5">
+                            <TextBlock>Width</TextBlock>
+                            <controls:NumberOnlyTextBox Value="{Binding InnerWidth}" IsEnabled="{Binding UseSafeZones}">
+                                <Interaction.Behaviors>
+                                    <EventTriggerBehavior EventName="LostFocus">
+                                        <InvokeCommandAction Command="{Binding UpdateRescalerIfNeededCommand}"></InvokeCommandAction>
+                                    </EventTriggerBehavior>
+                                </Interaction.Behaviors>
+                            </controls:NumberOnlyTextBox>
+                        </StackPanel>
+                        
+                        <!--> Height input <-->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 0, 0, 15" Spacing="5">
+                            <TextBlock>Height</TextBlock>
+                            <controls:NumberOnlyTextBox Value="{Binding InnerHeight}" IsEnabled="{Binding UseSafeZones}">
+                                <Interaction.Behaviors>
+                                    <EventTriggerBehavior EventName="LostFocus">
+                                        <InvokeCommandAction Command="{Binding UpdateRescalerIfNeededCommand}"></InvokeCommandAction>
+                                    </EventTriggerBehavior>
+                                </Interaction.Behaviors>
+                            </controls:NumberOnlyTextBox>
+                        </StackPanel>
+                        
+                        <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">Apply</Button>
+                    </Grid>
                 </Border>
                 
                 <!-- Output low slider -->
