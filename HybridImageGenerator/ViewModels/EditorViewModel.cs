@@ -54,12 +54,17 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     [ObservableProperty]
     private bool _useSafeZones = true;
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ApplyNewSafeZonesCommand))]
     private ushort _innerWidth;
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ApplyNewSafeZonesCommand))]
     private ushort _innerHeight;
     
     private bool _checkRescale = true;
     private DiscordFullScreenRescaler _rescaler = rescaler;
+
+    private int _mainImageWidth;
+    private int _mainImageHeight;
 
     partial void OnOutputLowChanged(byte value) {
         if (editor.Initialized)
@@ -86,16 +91,14 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
             await file.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
             SKImage? image = SKImage.FromEncodedData(memoryStream);
-
-            if (!(await CheckRescaling(image.Width, image.Height))) {
-                image.Dispose();
-                return;
-            }
             
             if (!editor.TrySetMainImage(image, out string? error)) {
                 ErrorDetails details = new(false, error!);
                 await DialogHost.Show(errorVmCreator(details));
             }
+
+            _mainImageWidth = image.Width;
+            _mainImageHeight = image.Height;
         }
         catch (Exception ex) {
             ErrorDetails details = new(false, ex.Message, ex.StackTrace);
@@ -210,11 +213,16 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     private async Task ShowSafeZoneToolTip() {
         await DialogHost.Show(new SafeZoneToolTipViewModel(), "MainDialogHost");
     }
-    
-    [RelayCommand]
-    private void UpdateRescalerIfNeeded() {
-        if (InnerHeight == _rescaler.InnerWindowHeight && InnerWidth == _rescaler.InnerWindowWidth) return;
 
+    [RelayCommand(CanExecute=nameof(SafeZonesAreDifferent))]
+    private async Task ApplyNewSafeZones() {
+        if (!SafeZonesAreDifferent()) return;
+        
         _rescaler = new DiscordFullScreenRescaler(InnerWidth, InnerHeight);
+        _ = await CheckRescaling(_mainImageWidth, _mainImageHeight);
     }
+
+    private bool SafeZonesAreDifferent() =>
+        InnerHeight != _rescaler.InnerWindowHeight || InnerWidth != _rescaler.InnerWindowWidth;
+
 }

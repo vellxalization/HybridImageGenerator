@@ -94,11 +94,6 @@
                         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 0, 0, 15" Spacing="5">
                             <TextBlock>Width</TextBlock>
                             <controls:NumberOnlyTextBox Value="{Binding InnerWidth}" IsEnabled="{Binding UseSafeZones}">
-                                <Interaction.Behaviors>
-                                    <EventTriggerBehavior EventName="LostFocus">
-                                        <InvokeCommandAction Command="{Binding UpdateRescalerIfNeededCommand}"></InvokeCommandAction>
-                                    </EventTriggerBehavior>
-                                </Interaction.Behaviors>
                             </controls:NumberOnlyTextBox>
                         </StackPanel>
                         
@@ -106,15 +101,10 @@
                         <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 0, 0, 15" Spacing="5">
                             <TextBlock>Height</TextBlock>
                             <controls:NumberOnlyTextBox Value="{Binding InnerHeight}" IsEnabled="{Binding UseSafeZones}">
-                                <Interaction.Behaviors>
-                                    <EventTriggerBehavior EventName="LostFocus">
-                                        <InvokeCommandAction Command="{Binding UpdateRescalerIfNeededCommand}"></InvokeCommandAction>
-                                    </EventTriggerBehavior>
-                                </Interaction.Behaviors>
                             </controls:NumberOnlyTextBox>
                         </StackPanel>
                         
-                        <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">Apply</Button>
+                        <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding ApplyNewSafeZonesCommand}">Apply</Button>
                     </Grid>
                 </Border>
                 
