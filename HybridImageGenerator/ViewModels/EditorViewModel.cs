@@ -55,16 +55,16 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     private bool _useSafeZones = true;
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ApplyNewSafeZonesCommand))]
-    private ushort _innerWidth;
+    private ushort _innerWidth = (ushort)rescaler.InnerWindowWidth;
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ApplyNewSafeZonesCommand))]
-    private ushort _innerHeight;
+    private ushort _innerHeight = (ushort)rescaler.InnerWindowHeight;
     
     private bool _checkRescale = true;
     private DiscordFullScreenRescaler _rescaler = rescaler;
 
-    private int _mainImageWidth;
-    private int _mainImageHeight;
+    private int? _mainImageWidth;
+    private int? _mainImageHeight;
 
     partial void OnOutputLowChanged(byte value) {
         if (editor.Initialized)
@@ -91,6 +91,14 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
             await file.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
             SKImage? image = SKImage.FromEncodedData(memoryStream);
+
+            if (UseSafeZones) {
+                bool continueUploading = await CheckRescaling(_rescaler, image.Width, image.Height);
+                if (!continueUploading) {
+                    image.Dispose();
+                    return;
+                }
+            }
             
             if (!editor.TrySetMainImage(image, out string? error)) {
                 ErrorDetails details = new(false, error!);
@@ -106,21 +114,15 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
         }
     }
 
-    private async Task<bool> CheckRescaling(int imageWidth, int imageHeight) {
-        if (!UseSafeZones || !_checkRescale)
-            return true;
-        
-        (int rescaledWidth, int rescaledHeight) rescaled = _rescaler.Rescale(imageWidth, imageHeight);
-        if (rescaled == (imageWidth, imageHeight))
-            return true;
-        
-        RescaleWarningViewModel viewModel = new RescaleWarningViewModel(imageWidth, imageHeight, rescaled.rescaledWidth, rescaled.rescaledHeight);
-        RescaleWarningResponse response = (RescaleWarningResponse)(await DialogHost.Show(viewModel))!;
-        _checkRescale = !response.DontShowForThisSize;
-        
-        return !response.LoadingCancelled;
+    private static async Task<bool> CheckRescaling(DiscordFullScreenRescaler rescaler, int imageWidth, int imageHeight) {
+        (int rescaledWidth, int rescaledHeight) rescaled = rescaler.Rescale(imageWidth, imageHeight);
+        if (rescaled.rescaledWidth == imageWidth && rescaled.rescaledHeight == imageHeight) return true;
+                
+        RescaleWarningViewModel viewModel = new(imageWidth, imageHeight, rescaled.rescaledWidth, rescaled.rescaledHeight);
+        bool agreed = (bool)(await DialogHost.Show(viewModel, "MainDialogHost"))!;
+        return agreed;
     }
-    
+
     [RelayCommand]
     private async Task LoadHiddenImage() {
         try {
@@ -164,6 +166,8 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     [RelayCommand(CanExecute=nameof(CanRemoveMainImage))]
     private void RemoveMainImage() {
         editor.RemoveMainImage();
+        _mainImageWidth = null;
+        _mainImageHeight = null;
     }
 
     private bool CanRemoveMainImage() => MainShader is not null;
@@ -216,10 +220,18 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
 
     [RelayCommand(CanExecute=nameof(SafeZonesAreDifferent))]
     private async Task ApplyNewSafeZones() {
+        if (!UseSafeZones) return;
         if (!SafeZonesAreDifferent()) return;
+
+        DiscordFullScreenRescaler newRescaler = new(InnerWidth, InnerHeight);
+        if (_mainImageWidth is null || _mainImageHeight is null) {
+            _rescaler = newRescaler;
+            return;
+        }
         
-        _rescaler = new DiscordFullScreenRescaler(InnerWidth, InnerHeight);
-        _ = await CheckRescaling(_mainImageWidth, _mainImageHeight);
+        bool updateRescaler = await CheckRescaling(newRescaler, _mainImageWidth.Value, _mainImageHeight.Value);
+        if (updateRescaler)
+            _rescaler = newRescaler;
     }
 
     private bool SafeZonesAreDifferent() =>

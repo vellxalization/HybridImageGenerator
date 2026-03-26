@@ -16,14 +16,8 @@ public partial class RescaleWarningViewModel(int imageWidth, int imageHeight, in
     private bool _dontShowForThisSize;
     
     [RelayCommand]
-    private void Ok() {
-        RescaleWarningResponse response = new(DontShowForThisSize, false);
-        DialogHost.GetDialogSession("MainDialogHost")?.Close(response);
-    }
+    private void Ok() => DialogHost.GetDialogSession("MainDialogHost")?.Close(true);
 
     [RelayCommand]
-    private void Cancel() {
-        RescaleWarningResponse response = new(DontShowForThisSize, true);
-        DialogHost.GetDialogSession("MainDialogHost")?.Close(response);
-    }
+    private void Cancel() => DialogHost.GetDialogSession("MainDialogHost")?.Close(false);
 }
