@@ -51,6 +51,9 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     [ObservableProperty]
     private Size _controlsSize;
 
+    private DiscordFullScreenRescaler _rescaler = rescaler;
+    private int? _mainImageWidth;
+    private int? _mainImageHeight;
     [ObservableProperty]
     private bool _useSafeZones = true;
     [ObservableProperty]
@@ -59,12 +62,6 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ApplyNewSafeZonesCommand))]
     private ushort _innerHeight = (ushort)rescaler.InnerWindowHeight;
-    
-    private bool _checkRescale = true;
-    private DiscordFullScreenRescaler _rescaler = rescaler;
-
-    private int? _mainImageWidth;
-    private int? _mainImageHeight;
 
     partial void OnOutputLowChanged(byte value) {
         if (editor.Initialized)

@@ -35,8 +35,8 @@
         </Style>
     </UserControl.Styles>
     
-    <!--> Images <-->
     <Grid Margin="20" ColumnSpacing="20" ColumnDefinitions="*, 3*">
+        <!--> Images <-->
         <Border Classes="StyledBorder" Grid.Column="1" BorderThickness="1">
             <Grid RowDefinitions="5*,10*,10*,10*,10*,5*" ColumnDefinitions="*,*" RowSpacing="5">
                 <!-- Load main --> 

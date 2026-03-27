@@ -12,8 +12,6 @@ public partial class RescaleWarningViewModel(int imageWidth, int imageHeight, in
     [ObservableProperty]
     private string _warningMessage 
         = string.Format(WarningMessageFormat, imageWidth, imageHeight, maxWidth, maxHeight);
-    [ObservableProperty]
-    private bool _dontShowForThisSize;
     
     [RelayCommand]
     private void Ok() => DialogHost.GetDialogSession("MainDialogHost")?.Close(true);
