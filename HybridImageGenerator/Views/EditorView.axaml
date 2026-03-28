@@ -86,22 +86,20 @@
                 <Border Padding="15, 0, 15, 0" Grid.Row="0" Grid.RowSpan="2" BorderThickness="0, 1, 0, 1" BorderBrush="#20FFFFFF">
                     <Grid RowDefinitions="*,*,*,*" ColumnDefinitions="*,*">
                         <DockPanel Grid.ColumnSpan="2">
-                            <Button DockPanel.Dock="Right" HorizontalAlignment="Right" IsEnabled="{Binding UseSafeZones}" CornerRadius="100" Command="{Binding ShowSafeZoneToolTipCommand}">?</Button>
-                            <CheckBox IsChecked="{Binding UseSafeZones}" VerticalAlignment="Center">Use Discord safe zone limits</CheckBox>
+                            <Button DockPanel.Dock="Right" HorizontalAlignment="Right" IsEnabled="{Binding UseSafeZones}" CornerRadius="100" Command="{Binding ShowSafeZoneToolTipCommand}" Content="?"/>
+                            <CheckBox IsChecked="{Binding UseSafeZones}" VerticalAlignment="Center" Content="Use Discord safe zone limits"/>
                         </DockPanel>
                         
                         <!--> Width input <-->
                         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 0, 0, 15" Spacing="5">
-                            <TextBlock>Width</TextBlock>
-                            <controls:NumberOnlyTextBox Value="{Binding InnerWidth}" IsEnabled="{Binding UseSafeZones}">
-                            </controls:NumberOnlyTextBox>
+                            <TextBlock Text="Width"/>
+                            <controls:NumberOnlyTextBox Value="{Binding InnerWidth}" IsEnabled="{Binding UseSafeZones}"/>
                         </StackPanel>
                         
                         <!--> Height input <-->
                         <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 0, 0, 15" Spacing="5">
-                            <TextBlock>Height</TextBlock>
-                            <controls:NumberOnlyTextBox Value="{Binding InnerHeight}" IsEnabled="{Binding UseSafeZones}">
-                            </controls:NumberOnlyTextBox>
+                            <TextBlock Text="Height"/>
+                            <controls:NumberOnlyTextBox Value="{Binding InnerHeight}" IsEnabled="{Binding UseSafeZones}"/>
                         </StackPanel>
                         
                         <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding ApplyNewSafeZonesCommand}">Apply</Button>

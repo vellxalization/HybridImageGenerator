@@ -5,9 +5,11 @@
              xmlns:viewModels="clr-namespace:HybridImageGenerator.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="HybridImageGenerator.Views.SafeZoneToolTipView"
-             x:DataType="viewModels:SafeZoneToolTipViewModel">
-    <StackPanel Orientation="Vertical">
-        <TextBlock>Safe zone tool tip placeholder text</TextBlock>
-        <Button Command="{Binding CloseCommand}">Got it</Button>
+             x:DataType="viewModels:SafeZoneToolTipViewModel"
+             Background="#000000">
+    
+    <StackPanel Margin="10" Spacing="5" Orientation="Vertical">
+        <TextBlock Text="Safe zone tool tip placeholder text"/>
+        <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding CloseCommand}" Content="Got it"/>
     </StackPanel>
 </UserControl>

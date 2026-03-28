@@ -5,11 +5,16 @@
              xmlns:viewModels="clr-namespace:HybridImageGenerator.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="HybridImageGenerator.Views.RescaleWarningView"
-             x:DataType="viewModels:RescaleWarningViewModel">
+             x:DataType="viewModels:RescaleWarningViewModel"
+             Background="#000000">
     
-    <Grid ColumnDefinitions="*, *" RowDefinitions="*, *, *">
-        <TextBox Grid.ColumnSpan="2" TextWrapping="Wrap" Text="{Binding WarningMessage}"></TextBox>
-        <Button Grid.Row="2" Grid.Column="0" Command="{Binding OkCommand}">Ok</Button>
-        <Button Grid.Row="2" Grid.Column="1" Command="{Binding CancelCommand}">Cancel</Button>
-    </Grid>
+    <StackPanel Margin="10" Spacing="5" Background="#000000">
+        <TextBox IsReadOnly="True" TextWrapping="Wrap" Text="{Binding WarningMessage}"/>
+        
+        <Grid ColumnDefinitions="2*, 3*" RowDefinitions="*">
+            <Button HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="0" Command="{Binding OkCommand}" Content="Ok"/>
+            <Button HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="1" Background="#374151" Command="{Binding CancelCommand}" Content="Cancel"/>
+        </Grid>
+    </StackPanel>
+    
 </UserControl>
