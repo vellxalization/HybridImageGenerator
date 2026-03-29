@@ -9,7 +9,26 @@
              Background="#000000">
     
     <StackPanel Margin="10" Spacing="5" Orientation="Vertical">
-        <TextBlock Text="Safe zone tool tip placeholder text"/>
+        <TextBlock  TextWrapping="Wrap">
+            <Bold>What is this?</Bold><LineBreak/>
+            This tool warns you if the image is too large and will be downscaled when viewed full-screen in Discord.<LineBreak/>
+            Feel free to disable it if you don't need Discord compatibility.<LineBreak/>
+            <LineBreak/>
+            <Bold>How does it work?</Bold><LineBreak/>
+            Discord downscales images that are too big to fit in full-screen view, which breaks the hybrid image illusion.<LineBreak/>
+            This downscaling is based on the app's window size minus some internal padding around the viewer.<LineBreak/>
+            <LineBreak/>
+            <Bold>Default values</Bold><LineBreak/>
+            <Run Text="{Binding DefaultSizesMessage}"/><LineBreak/>
+            Monitors below 1080p (or apps running in the windowed mode) will require smaller limits to ensure the hybrid image illusion works properly.<LineBreak/>
+            <LineBreak/>
+            <Bold>Custom values</Bold><LineBreak/>
+            If you plan to target different screen size:<LineBreak/>
+            1) Get Discord's window.innerWidth and window.innerHeight (DevTools: Ctrl + Shift + I);<LineBreak/>
+            2) <Italic>Optional:</Italic> Subtract ~100px from both to account for different OS taskbars;<LineBreak/>
+            3) <Italic>Optional for web clients:</Italic> Subtract another ~100px from the height to account for the browser interface;<LineBreak/>
+            4) Enter the results below.<LineBreak/>
+        </TextBlock>
         <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding CloseCommand}" Content="Got it"/>
     </StackPanel>
 </UserControl>

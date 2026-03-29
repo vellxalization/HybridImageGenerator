@@ -1,17 +1,18 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DialogHostAvalonia;
-using HybridImageGenerator.Models;
 
 namespace HybridImageGenerator.ViewModels;
 
 public partial class RescaleWarningViewModel(int imageWidth, int imageHeight, int maxWidth, int maxHeight) : ViewModelBase {
-    
-    private const string WarningMessageFormat = "Image ({0}x{1} pixels) will be shrinked down to {2}x{3} pixels";
+    private const string ImageTooBigFormat =
+        "The selected image ({0} by {1} pixels) exceeds the safe zone limits. Discord will downscale it in full-screen mode, which breaks the hybrid illusion.";
+    private const string RescaleFormat = "Consider resizing the image down to {0} by {1} (or lower) pixels before uploading.";
     
     [ObservableProperty]
-    private string _warningMessage 
-        = string.Format(WarningMessageFormat, imageWidth, imageHeight, maxWidth, maxHeight);
+    private string _rescaleMessage = string.Format(RescaleFormat, maxWidth , maxHeight);
+    [ObservableProperty]
+    private string _bigImageMessage = string.Format(ImageTooBigFormat, imageWidth, imageHeight);
     
     [RelayCommand]
     private void Ok() => DialogHost.GetDialogSession("MainDialogHost")?.Close(true);

@@ -20,8 +20,8 @@ public partial class App : Application {
     private const int HorizontalTaskBarHeight = 60; // this should cover most taskbars on win10 and 11
 
     // we target default desktop discord client on 1920x1080 fullscreen
-    private const int DefaultDiscordPCFullScreenInnerWidth = 1920 - VerticalTaskBarWidth;
-    private const int DefaultDiscordPCFullScreenInnerHeight = 1080 - HorizontalTaskBarHeight;
+    public const int DefaultDiscordPCFullScreenInnerWidth = 1920 - VerticalTaskBarWidth;
+    public const int DefaultDiscordPCFullScreenInnerHeight = 1080 - HorizontalTaskBarHeight;
     
     public override void Initialize() {
         AvaloniaXamlLoader.Load(this);
