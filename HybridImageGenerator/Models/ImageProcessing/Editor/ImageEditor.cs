@@ -14,11 +14,11 @@ namespace HybridImageGenerator.Models.ImageProcessing.Editor;
 public class ImageEditor(EditedImageSaver saver) {
     public bool Initialized { get; private set; }
     
-    private const int MinSize = 4;
-    
     private SKImage? _mainImage;
     private SKImage? _hiddenImage;
+    private const int MinSize = 4;
     
+    // events for controls
     public event EventHandler<SKShader?>? MainShaderChanged; 
     public event EventHandler<SKShader?>? HiddenShaderChanged; 
     public event EventHandler<SKShader?>? OutputLowShaderChanged; 
@@ -26,17 +26,19 @@ public class ImageEditor(EditedImageSaver saver) {
     public event EventHandler<SKShader?>? OverlayShaderChanged; 
     public event EventHandler<SKShader?>? StitchShaderChanged; 
     public event EventHandler<SKShader?>? GammaShaderChanged;
-    public event EventHandler<Size>? MainScaleChanged;
-    public event EventHandler<Size>? HiddenScaleChanged;
+    public event EventHandler<Size>? MainSizeChanged;
+    public event EventHandler<Size>? HiddenSizeChanged;
+    private Size _renderSize;
+    // all images are scaled to fit controls and all controls must be the same size
     
+    private PipelineNode<OutputLowFactory> _previewOutputLowNode; // fully fits the control
+    private PipelineNode<NegativeFactory> _previewNegativeNode;  // fully fits the control
     private PipelineNode<OutputLowFactory> _outputLowNode;
     private PipelineNode<NegativeFactory> _negativeNode;
     private PipelineNode<OverlayFactory> _overlayNode;
     private PipelineNode<StitchingFactory> _stitchNode;
     private PipelineNode<GammaFactory> _gammaNode;
     
-    // all images are scaled to fit controls and all controls must be the same size
-    private Size _renderSize;
 
     public void Initialize() {
         if (Initialized) return;
@@ -53,6 +55,8 @@ public class ImageEditor(EditedImageSaver saver) {
             field = value;
             _outputLowNode.Factory.OutputLow = value;
             _outputLowNode.SendUpdate();
+            _previewOutputLowNode.Factory.OutputLow = value;
+            _previewOutputLowNode.SendUpdate();
         }
     }
 
@@ -60,7 +64,7 @@ public class ImageEditor(EditedImageSaver saver) {
         get;
         set {
             EnsureInitialized();
-            
+
             field = value;
             _overlayNode.Factory.Opacity = value;
             _overlayNode.SendUpdate();
@@ -81,28 +85,23 @@ public class ImageEditor(EditedImageSaver saver) {
     private void CreatePipeline() {
         _outputLowNode = new PipelineNode<OutputLowFactory>(new OutputLowFactory());
         _negativeNode = new PipelineNode<NegativeFactory>(new NegativeFactory());
+        _previewOutputLowNode = new PipelineNode<OutputLowFactory>(new OutputLowFactory());
+        _previewNegativeNode = new PipelineNode<NegativeFactory>(new NegativeFactory());
         _overlayNode = new PipelineNode<OverlayFactory>(new OverlayFactory());
         _stitchNode = new PipelineNode<StitchingFactory>(new StitchingFactory());
         _gammaNode = new PipelineNode<GammaFactory>(new GammaFactory());
         
         // ideally we want to dispose old shaders, however it creates a bug when avalonia might reuse old
         // draw operation with disposed shader so we leave it at the mercy of the GC
+        _previewOutputLowNode.Link(_previewNegativeNode, (newShader, node) => node.Factory.InputShader = newShader);
         _outputLowNode.Link(_negativeNode, (newShader, node) => node.Factory.InputShader = newShader);
         _outputLowNode.Link(_stitchNode, (newShader, node) => node.Factory.OverlayShader = newShader);
         _negativeNode.Link(_overlayNode, (newShader, node) => node.Factory.OverlayShader = newShader);
         _overlayNode.Link(_stitchNode, (newShader, node) => node.Factory.InputShader = newShader);
         _stitchNode.Link(_gammaNode, (newShader, node) => node.Factory.InputShader = newShader);
-
-        MainShaderChanged += (_, newShader) => {
-            _overlayNode.Factory.InputShader = newShader;
-            _overlayNode.SendUpdate();
-        };
-        HiddenShaderChanged += (_, newShader) => {
-            _outputLowNode.Factory.InputShader = newShader;
-            _outputLowNode.SendUpdate();
-        };
-        _outputLowNode.ShaderUpdated += (_, shader) => OutputLowShaderChanged?.Invoke(this, shader);
-        _negativeNode.ShaderUpdated += (_, shader) => NegativeShaderChanged?.Invoke(this, shader);
+        
+        _previewOutputLowNode.ShaderUpdated += (_, shader) => OutputLowShaderChanged?.Invoke(this, shader);
+        _previewNegativeNode.ShaderUpdated += (_, shader) => NegativeShaderChanged?.Invoke(this, shader);
         _overlayNode.ShaderUpdated += (_, shader) => OverlayShaderChanged?.Invoke(this, shader);
         _stitchNode.ShaderUpdated += (_, shader) => StitchShaderChanged?.Invoke(this, shader);
         _gammaNode.ShaderUpdated += (_, shader) => GammaShaderChanged?.Invoke(this, shader);
@@ -112,19 +111,13 @@ public class ImageEditor(EditedImageSaver saver) {
         EnsureInitialized();
         
         if (newSize == _renderSize) return;
-        
         _renderSize = newSize;
-        if (_mainImage is not null) {
-            (SKShader shader, Size shaderSize) scaled = ScaleImage(_mainImage, newSize);
-            MainScaleChanged?.Invoke(this, scaled.shaderSize);
-            MainShaderChanged?.Invoke(this, scaled.shader);
-        }
         
-        if (_hiddenImage is not null) {
-            (SKShader shader, Size shaderSize) scaled = ScaleImage(_hiddenImage, newSize);
-            HiddenScaleChanged?.Invoke(this, scaled.shaderSize);
-            HiddenShaderChanged?.Invoke(this, scaled.shader);
-        }
+        if (_mainImage is not null)
+            UpdateMain(_mainImage);
+        
+        if (_hiddenImage is not null)
+            UpdateHidden(_hiddenImage);
     }
     
     public bool TrySetMainImage(SKImage image, out string? error) {
@@ -137,17 +130,23 @@ public class ImageEditor(EditedImageSaver saver) {
             error = $"Image must be at least {MinSize} by {MinSize} pixels";
             return false;
         }
-
-        (SKShader shader, Size shaderSize) scaled = ScaleImage(image, _renderSize);
         
         _mainImage?.Dispose();
         _mainImage = image;
-
-        MainScaleChanged?.Invoke(this, scaled.shaderSize);
-        MainShaderChanged?.Invoke(this, scaled.shader);
+        UpdateMain(image);
         
         error = null;
         return true;
+    }
+
+    private void UpdateMain(SKImage image) {
+        (SKShader shader, Size shaderSize) scaled = ScaleImageToControl(image, _renderSize);
+        MainSizeChanged?.Invoke(this, scaled.shaderSize);
+        MainShaderChanged?.Invoke(this, scaled.shader);
+        _overlayNode.Factory.InputShader = scaled.shader;
+        _overlayNode.SendUpdate();
+        if (_hiddenImage is not null) // rescale hidden
+            UpdateHidden(_hiddenImage);
     }
     
     public bool TrySetHiddenImage(SKImage image, out string? error) {
@@ -161,16 +160,33 @@ public class ImageEditor(EditedImageSaver saver) {
             return false;
         }
         
-        (SKShader shader, Size shaderSize) scaled = ScaleImage(image, _renderSize);
-        
         _hiddenImage?.Dispose();
         _hiddenImage = image;
-        
-        HiddenScaleChanged?.Invoke(this, scaled.shaderSize);
-        HiddenShaderChanged?.Invoke(this, scaled.shader);
-        
+        UpdateHidden(image);
+
         error = null;
         return true;
+    }
+
+    private void UpdateHidden(SKImage image) {
+        UpdateHiddenOnlyPreviews(image);
+        UpdateMainPipeline(image);
+    }
+
+    private void UpdateHiddenOnlyPreviews(SKImage image) {
+        (SKShader shader, Size shaderSize) scaled = ScaleImageToControl(image, _renderSize);
+        HiddenSizeChanged?.Invoke(this, scaled.shaderSize);
+        HiddenShaderChanged?.Invoke(this, scaled.shader);
+        _previewOutputLowNode.Factory.InputShader = scaled.shader;
+        _previewOutputLowNode.SendUpdate();
+    }
+
+    private void UpdateMainPipeline(SKImage image) {
+        if (_mainImage is null) return;
+
+        SKShader shader = ScaleImageRelativeToMain(image);
+        _outputLowNode.Factory.InputShader = shader;
+        _outputLowNode.SendUpdate();
     }
     
     public void RemoveMainImage() {
@@ -179,8 +195,11 @@ public class ImageEditor(EditedImageSaver saver) {
         if (_mainImage is null) return;
         
         MainShaderChanged?.Invoke(this, null);
+        MainSizeChanged?.Invoke(this, new Size(0, 0));
         _mainImage.Dispose();
         _mainImage = null;
+        _overlayNode.Factory.InputShader = null;
+        _overlayNode.SendUpdate();
     }
     
     public void RemoveHiddenImage() {
@@ -189,11 +208,27 @@ public class ImageEditor(EditedImageSaver saver) {
         if (_hiddenImage is null) return;
         
         HiddenShaderChanged?.Invoke(this, null);
+        HiddenSizeChanged?.Invoke(this, new Size(0, 0));
         _hiddenImage.Dispose();
         _hiddenImage = null;
+        _previewOutputLowNode.Factory.InputShader = null;
+        _previewOutputLowNode.SendUpdate();
+        _outputLowNode.Factory.InputShader = null;
+        _outputLowNode.SendUpdate();
+    }
+
+    private SKShader ScaleImageRelativeToMain(SKImage image) {
+        SKMatrix scaleMatrix = CalculateScaleMatrix(_renderSize, _mainImage!.Width, _mainImage.Height); 
+        SKShader? scaledImage = image.ToShader(SKShaderTileMode.Decal, SKShaderTileMode.Decal).WithLocalMatrix(scaleMatrix);
+        if (!IsValidSkiaObject(scaledImage)) {
+            scaledImage?.Dispose();
+            throw new SkiaObjectInvalidStateException("Failed to generate shader from main image");
+        }
+
+        return scaledImage;
     }
     
-    private static (SKShader shader, Size shaderSize) ScaleImage(SKImage image, Size sizeToFit) {
+    private static (SKShader shader, Size shaderSize) ScaleImageToControl(SKImage image, Size sizeToFit) {
         SKMatrix scaleMatrix = CalculateScaleMatrix(sizeToFit, image.Width, image.Height);
         SKShader? scaledImage = image.ToShader().WithLocalMatrix(scaleMatrix);
         if (!IsValidSkiaObject(scaledImage)) {

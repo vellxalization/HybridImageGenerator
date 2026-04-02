@@ -44,9 +44,9 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     private float _gamma;
 
     [ObservableProperty]
-    private Size _mainScale;
+    private Size _mainSize;
     [ObservableProperty]
-    private Size _hiddenScale;
+    private Size _hiddenSize;
 
     [ObservableProperty]
     private Size _controlsSize;
@@ -197,8 +197,8 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
         editor.StitchShaderChanged += (_, shader) => StitchShader = shader;
         editor.GammaShaderChanged += (_, shader) => GammaShader = shader;
 
-        editor.MainScaleChanged += (_, size) => MainScale = size;
-        editor.HiddenScaleChanged += (_, size) => HiddenScale = size;
+        editor.MainSizeChanged += (_, size) => MainSize = size;
+        editor.HiddenSizeChanged += (_, size) => HiddenSize = size;
         editor.SetRenderSize(ControlsSize);
     }
 

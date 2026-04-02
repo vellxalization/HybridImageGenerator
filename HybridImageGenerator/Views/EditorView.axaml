@@ -52,7 +52,7 @@
                 </StackPanel>
                 
                 <!-- Unedited main preview -->
-                <controls:ShaderImageControl Grid.Row="1" Grid.Column="0" InputShader="{Binding MainShader, Mode=OneWay}" ImageSize="{Binding MainScale}">
+                <controls:ShaderImageControl Grid.Row="1" Grid.Column="0" InputShader="{Binding MainShader, Mode=OneWay}" ImageSize="{Binding MainSize}">
                     <Interaction.Behaviors>
                         <EventTriggerBehavior EventName="SizeChanged">
                             <InvokeCommandAction Command="{Binding UpdateControlsScaleCommand}" PassEventArgsToCommand="True"></InvokeCommandAction>
@@ -61,22 +61,22 @@
                 </controls:ShaderImageControl>
 
                 <!-- Unedited hidden preview -->
-                <controls:ShaderImageControl Grid.Row="1" Grid.Column="1" InputShader="{Binding HiddenShader, Mode=OneWay}" ImageSize="{Binding HiddenScale}"/>
+                <controls:ShaderImageControl Grid.Row="1" Grid.Column="1" InputShader="{Binding HiddenShader, Mode=OneWay}" ImageSize="{Binding HiddenSize}"/>
 
                 <!-- Output low preview -->
-                <controls:ShaderImageControl Grid.Row="2" Grid.Column="0" InputShader="{Binding OutputLowShader, Mode=OneWay}" ImageSize="{Binding MainScale}"/>
+                <controls:ShaderImageControl Grid.Row="2" Grid.Column="0" InputShader="{Binding OutputLowShader, Mode=OneWay}" ImageSize="{Binding HiddenSize}"/>
 
                 <!-- Negative preview -->
-                <controls:ShaderImageControl Grid.Row="2" Grid.Column="1" InputShader="{Binding NegativeShader, Mode=OneWay}" ImageSize="{Binding MainScale}"/>
+                <controls:ShaderImageControl Grid.Row="2" Grid.Column="1" InputShader="{Binding NegativeShader, Mode=OneWay}" ImageSize="{Binding HiddenSize}"/>
 
                 <!-- Overlay preview -->
-                <controls:ShaderImageControl Grid.Row="3" Grid.Column="0" InputShader="{Binding OverlayShader, Mode=OneWay}" ImageSize="{Binding MainScale}"/>
+                <controls:ShaderImageControl Grid.Row="3" Grid.Column="0" InputShader="{Binding OverlayShader, Mode=OneWay}" ImageSize="{Binding MainSize}"/>
 
                 <!-- Stitched preview -->
-                <controls:ShaderImageControl Grid.Row="4" Grid.Column="0" InputShader="{Binding StitchShader, Mode=OneWay}" ImageSize="{Binding MainScale}"/>
+                <controls:ShaderImageControl Grid.Row="4" Grid.Column="0" InputShader="{Binding StitchShader, Mode=OneWay}" ImageSize="{Binding MainSize}"/>
 
                 <!-- Gamma preview -->
-                <controls:ShaderImageControl Grid.Row="4" Grid.Column="1" InputShader="{Binding GammaShader, Mode=OneWay}" ImageSize="{Binding MainScale}"/>
+                <controls:ShaderImageControl Grid.Row="4" Grid.Column="1" InputShader="{Binding GammaShader, Mode=OneWay}" ImageSize="{Binding MainSize}"/>
             </Grid>
         </Border>
         <!-- Tools -->
