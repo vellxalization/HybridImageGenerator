@@ -13,7 +13,8 @@
     <Application.DataTemplates>
         <DataTemplate DataType="{x:Type errorHandling:DesktopErrorViewModel}"><views:ErrorView /></DataTemplate>
         <DataTemplate DataType="{x:Type errorHandling:WebErrorViewModel}"><views:ErrorView /></DataTemplate>
-        <DataTemplate DataType="{x:Type viewModels:RescaleWarningViewModel}"><views:RescaleWarningView /></DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:FullScreenRescaleWarningViewModel}"><views:FullScreenRescaleWarningView /></DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:PreviewRescaleWarningViewModel}"><views:PreviewRescaleWarningView /></DataTemplate>
         <DataTemplate DataType="{x:Type viewModels:SafeZoneToolTipViewModel}"><views:SafeZoneToolTipView /></DataTemplate>
         <local:ViewLocator/>
     </Application.DataTemplates>

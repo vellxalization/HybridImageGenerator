@@ -14,7 +14,7 @@ using SkiaSharp;
 
 namespace HybridImageGenerator.ViewModels;
 
-public partial class EditorViewModel(ImageFileService fileService, ImageEditor editor, DiscordFullScreenRescaler rescaler, 
+public partial class EditorViewModel(ImageFileService fileService, ImageEditor editor, DiscordImageRescaler rescaler, 
     Func<ErrorDetails, ErrorViewModel> errorVmCreator) : ViewModelBase {
     
     [ObservableProperty]
@@ -51,7 +51,7 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     [ObservableProperty]
     private Size _controlsSize;
 
-    private DiscordFullScreenRescaler _rescaler = rescaler;
+    private DiscordImageRescaler _rescaler = rescaler;
     private int? _mainImageWidth;
     private int? _mainImageHeight;
     [ObservableProperty]
@@ -111,11 +111,16 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
         }
     }
 
-    private static async Task<bool> CheckRescaling(DiscordFullScreenRescaler rescaler, int imageWidth, int imageHeight) {
-        (int rescaledWidth, int rescaledHeight) rescaled = rescaler.Rescale(imageWidth, imageHeight);
-        if (rescaled.rescaledWidth == imageWidth && rescaled.rescaledHeight == imageHeight) return true;
-                
-        RescaleWarningViewModel viewModel = new(imageWidth, imageHeight, rescaled.rescaledWidth, rescaled.rescaledHeight);
+    private static async Task<bool> CheckRescaling(DiscordImageRescaler rescaler, int imageWidth, int imageHeight) {
+        (int rescaledWidth, int rescaledHeight) fullScreenRescaled = rescaler.RescaleFullScreen(imageWidth, imageHeight);
+        bool imageTooBig = fullScreenRescaled.rescaledWidth != imageWidth || fullScreenRescaled.rescaledHeight != imageHeight;
+        bool imageTooSmall = !DiscordImageRescaler.WillPreviewRescale(imageWidth, imageHeight);
+        if (!imageTooSmall && !imageTooBig) return true;
+
+        ViewModelBase viewModel = imageTooSmall 
+            ? new PreviewRescaleWarningViewModel(imageWidth, imageHeight)
+            : new FullScreenRescaleWarningViewModel(imageWidth, imageHeight, fullScreenRescaled.rescaledWidth, fullScreenRescaled.rescaledHeight);
+        
         bool agreed = (bool)(await DialogHost.Show(viewModel, "MainDialogHost"))!;
         return agreed;
     }
@@ -220,7 +225,7 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
         if (!UseSafeZones) return;
         if (!SafeZonesAreDifferent()) return;
 
-        DiscordFullScreenRescaler newRescaler = new(InnerWidth, InnerHeight);
+        DiscordImageRescaler newRescaler = new(InnerWidth, InnerHeight);
         if (_mainImageWidth is null || _mainImageHeight is null) {
             _rescaler = newRescaler;
             return;

@@ -2,18 +2,20 @@
 
 namespace HybridImageGenerator.Models;
 
-public class DiscordFullScreenRescaler(int innerWindowWidth, int innerWindowHeight) {
+public class DiscordImageRescaler(int innerWindowWidth, int innerWindowHeight) {
     private const int FirstHorizontalPadding = 24; // _
     private const int SecondHorizontalPadding = 272; // m
     private const int FirstVerticalPadding = 88; // h
     private const int SecondVerticalPadding = 36; // f
     // i have no idea what these paddings are but discord
     // uses them to determine the new size of a picture
+    public const int PreviewMaxWidth = 550;
+    public const int PreviewMaxHeight = 350;
 
     public int InnerWindowWidth => innerWindowWidth;
     public int InnerWindowHeight => innerWindowHeight;
 
-    public (int rescaledWidth, int rescaledHeight) Rescale(int imageWidth, int imageHeight) {
+    public (int rescaledWidth, int rescaledHeight) RescaleFullScreen(int imageWidth, int imageHeight) {
         int firstWidth = innerWindowWidth - FirstHorizontalPadding * 2;
         int secondWidth = innerWindowWidth - SecondHorizontalPadding * 2;
         int firstHeight = innerWindowHeight - FirstVerticalPadding * 2;
@@ -44,4 +46,7 @@ public class DiscordFullScreenRescaler(int innerWindowWidth, int innerWindowHeig
     
     private static bool NeedRescaling(int width, int height, int maxWidth, int maxHeight) 
         => width > maxWidth || height > maxHeight;
+    
+    public static bool WillPreviewRescale(int width, int height) 
+        => width > PreviewMaxWidth || height > PreviewMaxHeight;
 }

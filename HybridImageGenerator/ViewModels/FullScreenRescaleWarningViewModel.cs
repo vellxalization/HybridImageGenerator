@@ -4,7 +4,7 @@ using DialogHostAvalonia;
 
 namespace HybridImageGenerator.ViewModels;
 
-public partial class RescaleWarningViewModel(int imageWidth, int imageHeight, int maxWidth, int maxHeight) : ViewModelBase {
+public partial class FullScreenRescaleWarningViewModel(int imageWidth, int imageHeight, int maxWidth, int maxHeight) : ViewModelBase {
     private const string ImageTooBigFormat =
         "The selected image ({0} by {1} pixels) exceeds the safe zone limits. Discord will downscale it in full-screen mode, which breaks the hybrid illusion.";
     private const string RescaleFormat = "Consider resizing the image down to {0} by {1} (or lower) pixels before uploading.";
@@ -12,7 +12,7 @@ public partial class RescaleWarningViewModel(int imageWidth, int imageHeight, in
     [ObservableProperty]
     private string _rescaleMessage = string.Format(RescaleFormat, maxWidth , maxHeight);
     [ObservableProperty]
-    private string _bigImageMessage = string.Format(ImageTooBigFormat, imageWidth, imageHeight);
+    private string _imageTooBigMessage = string.Format(ImageTooBigFormat, imageWidth, imageHeight);
     
     [RelayCommand]
     private void Ok() => DialogHost.GetDialogSession("MainDialogHost")?.Close(true);

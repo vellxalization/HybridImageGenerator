@@ -4,14 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:HybridImageGenerator.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="HybridImageGenerator.Views.RescaleWarningView"
-             x:DataType="viewModels:RescaleWarningViewModel"
+             x:Class="HybridImageGenerator.Views.FullScreenRescaleWarningView"
+             x:DataType="viewModels:FullScreenRescaleWarningViewModel"
              Background="#000000">
     
     <StackPanel Margin="10" Spacing="5" Background="#000000">
         <TextBlock TextWrapping="Wrap">
             <Bold>Warning!</Bold><LineBreak/>
-            <Run Text="{Binding BigImageMessage}"/><LineBreak/>
+            <Run Text="{Binding ImageTooBigMessage}"/><LineBreak/>
             <Run Text="{Binding RescaleMessage}"/><LineBreak/>
             Check the safe zone tooltip for more information.
         </TextBlock>

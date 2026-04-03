@@ -42,7 +42,7 @@ public partial class App : Application {
 
     private static MainWindow CreateDesktopMainWindow() {
         ImageEditor editor = new(new EditedImageSaver());
-        DiscordFullScreenRescaler rescaler = new(DefaultDiscordPCFullScreenInnerWidth, DefaultDiscordPCFullScreenInnerHeight);
+        DiscordImageRescaler rescaler = new(DefaultDiscordPCFullScreenInnerWidth, DefaultDiscordPCFullScreenInnerHeight);
         
         MainWindow mainWindow = new();
         ImageFileService imageFileService = new(StorageProviderGetter);
@@ -57,7 +57,7 @@ public partial class App : Application {
     
     private static MainView CreateWebMainView() {
         ImageEditor editor = new(new EditedImageSaver());
-        DiscordFullScreenRescaler rescaler = new(DefaultDiscordPCFullScreenInnerWidth, DefaultDiscordPCFullScreenInnerHeight);
+        DiscordImageRescaler rescaler = new(DefaultDiscordPCFullScreenInnerWidth, DefaultDiscordPCFullScreenInnerHeight);
         
         MainView mainView = new();
         ImageFileService imageFileService = new(StorageProviderGetter);

@@ -1,0 +1,24 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:HybridImageGenerator.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="HybridImageGenerator.Views.PreviewRescaleWarningView"
+             x:DataType="viewModels:PreviewRescaleWarningViewModel"
+             Background="#000000">
+    
+    <StackPanel Margin="10" Spacing="5" Background="#000000">
+        <TextBlock TextWrapping="Wrap">
+            <Bold>Warning!</Bold><LineBreak/>
+            <Run Text="{Binding ImageTooSmallMessage}"/><LineBreak/>
+            <Run Text="{Binding RescaleMessage}"/><LineBreak/>
+            Check the safe zone tooltip for more information.
+        </TextBlock>
+        <Grid ColumnDefinitions="2*, 3*" RowDefinitions="*">
+            <Button HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="0" Command="{Binding OkCommand}" Content="Ok"/>
+            <Button HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="1" Background="#374151" Command="{Binding CancelCommand}" Content="Cancel"/>
+        </Grid>
+    </StackPanel>
+    
+</UserControl>

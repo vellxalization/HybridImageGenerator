@@ -2,8 +2,8 @@
 
 namespace HybridImageGenerator.Views;
 
-public partial class RescaleWarningView : UserControl {
-    public RescaleWarningView() {
+public partial class PreviewRescaleWarningView : UserControl {
+    public PreviewRescaleWarningView() {
         InitializeComponent();
     }
 }
