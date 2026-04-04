@@ -7,7 +7,7 @@ namespace HybridImageGenerator.ViewModels;
 
 public partial class PreviewRescaleWarningViewModel(int imageWidth, int imageHeight) : ViewModelBase {
     private const string ImageTooSmallFormat =
-        "The selected image ({0} by {1} pixels) is too small. Discord won't downscale it in preview, which breaks the hybrid illusion.";
+        "The selected image ({0} by {1} pixels) is too small. Discord won't downscale the preview, which will break the hybrid effect.";
     private const string RescaleFormat = "Consider resizing the image up to {0} by {1} (or higher) pixels before uploading.";
 
     [ObservableProperty]

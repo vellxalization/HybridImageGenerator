@@ -11,23 +11,26 @@
     <StackPanel Margin="10" Spacing="5" Orientation="Vertical">
         <TextBlock  TextWrapping="Wrap">
             <Bold>What is this?</Bold><LineBreak/>
-            This tool warns you if the image is too large and will be downscaled when viewed full-screen in Discord.<LineBreak/>
+            For the hybrid image to work, we need to ensure that Discord resizes the preview but not the full-screen image.<LineBreak/>
+            This tool warns you if your image is too large (causing full-screen downscaling) or too small (failing to trigger preview downscaling).<LineBreak/>
             Feel free to disable it if you don't need Discord compatibility.<LineBreak/>
             <LineBreak/>
             <Bold>How does it work?</Bold><LineBreak/>
-            Discord downscales images that are too big to fit in full-screen view, which breaks the hybrid image illusion.<LineBreak/>
+            Discord downscales images that are too big to fit in full-screen view, which breaks the hybrid image effect.<LineBreak/>
             This downscaling is based on the app's window size minus some internal padding around the viewer.<LineBreak/>
+            <Run Text="{Binding PreviewRescaleMessage}"/><LineBreak/>
+            To force Discord to resize an image and maintain the hybrid image effect, consider making your image bigger than at least one of these values.<LineBreak/>
             <LineBreak/>
             <Bold>Default values</Bold><LineBreak/>
             <Run Text="{Binding DefaultSizesMessage}"/><LineBreak/>
-            Monitors below 1080p (or apps running in the windowed mode) will require smaller limits to ensure the hybrid image illusion works properly.<LineBreak/>
+            Monitors below 1080p (or apps running in the windowed mode) will require smaller images to ensure the hybrid image works properly.<LineBreak/>
             <LineBreak/>
             <Bold>Custom values</Bold><LineBreak/>
             If you plan to target different screen size:<LineBreak/>
-            1) Get Discord's window.innerWidth and window.innerHeight (DevTools: Ctrl + Shift + I);<LineBreak/>
-            2) <Italic>Optional:</Italic> Subtract ~100px from both to account for different OS taskbars;<LineBreak/>
-            3) <Italic>Optional for web clients:</Italic> Subtract another ~100px from the height to account for the browser interface;<LineBreak/>
-            4) Enter the results below.<LineBreak/>
+            1)Get Discord's window.innerWidth and window.innerHeight (DevTools: Ctrl + Shift + I);<LineBreak/>
+            2)<Italic>Optional:</Italic> Subtract ~100px from both to account for different OS taskbars;<LineBreak/>
+            3)<Italic>Optional:</Italic> If you are getting the values from the desktop version and plan to target the web version, subtract another ~100px from the height to account for the browser interface. If you are getting the values from the web version, ignore this step;<LineBreak/>
+            4)Enter the results below.<LineBreak/>
         </TextBlock>
         <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding CloseCommand}" Content="Got it"/>
     </StackPanel>
