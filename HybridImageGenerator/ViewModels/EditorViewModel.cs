@@ -81,13 +81,8 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     [RelayCommand]
     private async Task LoadMainImage() {
         try {
-            await using Stream? file = await fileService.SelectOpenFile();
-            if (file is null) return;
-
-            using MemoryStream memoryStream = new((int)file.Length);
-            await file.CopyToAsync(memoryStream);
-            memoryStream.Position = 0;
-            SKImage? image = SKImage.FromEncodedData(memoryStream);
+            SKImage? image = await OpenImage();
+            if (image is null) return;
 
             if (UseSafeZones) {
                 bool continueUploading = await CheckRescaling(_rescaler, image.Width, image.Height);
@@ -111,6 +106,7 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
         }
     }
 
+    
     private static async Task<bool> CheckRescaling(DiscordImageRescaler rescaler, int imageWidth, int imageHeight) {
         (int rescaledWidth, int rescaledHeight) fullScreenRescaled = rescaler.RescaleFullScreen(imageWidth, imageHeight);
         bool imageTooBig = fullScreenRescaled.rescaledWidth != imageWidth || fullScreenRescaled.rescaledHeight != imageHeight;
@@ -128,13 +124,9 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     [RelayCommand]
     private async Task LoadHiddenImage() {
         try {
-            await using Stream? file = await fileService.SelectOpenFile();
-            if (file is null) return;
-
-            using MemoryStream memoryStream = new((int)file.Length);
-            await file.CopyToAsync(memoryStream);
-            memoryStream.Position = 0;
-            SKImage? image = SKImage.FromEncodedData(memoryStream);
+            SKImage? image = await OpenImage();
+            if (image is null) return;
+            
             if (!editor.TrySetHiddenImage(image, out string? error)) {
                 ErrorDetails details = new(false, error!);
                 await DialogHost.Show(errorVmCreator(details));
@@ -145,6 +137,17 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
             ErrorDetails details = new(isFatal, ex.Message, ex.StackTrace);
             await DialogHost.Show(errorVmCreator(details));
         }
+    }
+    
+    private async Task<SKImage?> OpenImage() {
+        await using Stream? file = await fileService.SelectOpenFile();
+        if (file is null) return null;
+
+        using MemoryStream memoryStream = new((int)file.Length);
+        await file.CopyToAsync(memoryStream);
+        memoryStream.Position = 0;
+        SKImage? image = SKImage.FromEncodedData(memoryStream);
+        return image ?? throw new Exception("Failed to open image");
     }
     
     [RelayCommand(CanExecute=nameof(CanSave))]

@@ -9,12 +9,18 @@ namespace HybridImageGenerator.Models.ImageProcessing;
 public class ImageFileService(Func<IStorageProvider> storageProviderGetter) {
     private readonly FilePickerFileType[] _openFilter = 
     [
-        new("Images") { Patterns = ["*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp"] }
+        new("Images") {
+            Patterns = ["*.png", "*.jpg", "*.pjp", "*.jfif", "*.jpe", "*.pjpeg", "*.jpeg", "*.dib", "*.bmp", "*.webp"], 
+            MimeTypes = ["image/png", "image/jpg", "image/jpeg", "image/bmp", "image/webp"]
+        }
     ];
     
     private readonly FilePickerFileType[] _saveFilter = 
     [
-        new("GIFs") { Patterns = ["*.gif"] }
+        new("GIFs") {
+            Patterns = ["*.gif"],
+            MimeTypes = ["image/gif"]
+        }
     ];
     
     public async Task<Stream?> SelectOpenFile() {
