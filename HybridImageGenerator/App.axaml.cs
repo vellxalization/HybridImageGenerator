@@ -1,10 +1,14 @@
+using System;
+using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using HybridImageGenerator.Models;
 using HybridImageGenerator.Models.ImageProcessing;
 using HybridImageGenerator.Models.ImageProcessing.Editor;
@@ -32,9 +36,15 @@ public partial class App : Application {
             DisableAvaloniaDataAnnotationValidation();
 
             desktop.MainWindow = CreateDesktopMainWindow();
+            AppDomain.CurrentDomain.UnhandledException += (_, e) => LogFatalDesktop((e.ExceptionObject as Exception)!, "EX_");
+            Dispatcher.UIThread.UnhandledException += (_, e) => LogFatalDesktop(e.Exception, "UI_");
+            TaskScheduler.UnobservedTaskException += (_, e) => LogFatalDesktop(e.Exception, "TK_");
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform) {
             singleViewPlatform.MainView = CreateWebMainView();
+            AppDomain.CurrentDomain.UnhandledException += (_, e) => LogFatalWeb((e.ExceptionObject as Exception)!, "EX_");
+            Dispatcher.UIThread.UnhandledException += (_, e) => LogFatalWeb(e.Exception, "UI_");
+            TaskScheduler.UnobservedTaskException += (_, e) => LogFatalWeb(e.Exception, "TK_");
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -79,5 +89,16 @@ public partial class App : Application {
         foreach (DataAnnotationsValidationPlugin plugin in dataValidationPluginsToRemove) {
             BindingPlugins.DataValidators.Remove(plugin);
         }
+    }
+    
+    private static void LogFatalDesktop(Exception ex, string tag = "") {
+        using var file = File.CreateText($"{tag}HybridImageGenerator_{DateTimeOffset.UtcNow.ToFileTime()}.log");
+        string msg = ex.ToString().Replace(Environment.UserName, "%USERNAME%", StringComparison.OrdinalIgnoreCase);
+        file.WriteLine(msg);
+    }
+    
+    private static void LogFatalWeb(Exception ex, string tag = "") {
+        string msg = $"{tag}_{ex.ToString().Replace(Environment.UserName, "%USERNAME%", StringComparison.OrdinalIgnoreCase)}";
+        Console.WriteLine(msg);
     }
 }
