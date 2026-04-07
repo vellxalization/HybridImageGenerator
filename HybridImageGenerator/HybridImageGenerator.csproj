@@ -24,6 +24,7 @@
         <PackageReference Include="CommunityToolkit.Mvvm"/>
         <PackageReference Include="DialogHost.Avalonia" />
         <PackageReference Include="SkiaSharp" />
+        <PackageReference Include="SkiaSharp.Views.Blazor" />
         <PackageReference Include="System.IO.Hashing" />
         <PackageReference Include="Xaml.Behaviors" />
     </ItemGroup>
