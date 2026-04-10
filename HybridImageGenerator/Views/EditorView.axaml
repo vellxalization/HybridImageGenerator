@@ -41,13 +41,13 @@
             <Grid RowDefinitions="5*,10*,10*,10*,10*,5*" ColumnDefinitions="*,*" RowSpacing="5">
                 <!-- Load main --> 
                 <StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" Orientation="Horizontal">
-                    <Button HorizontalAlignment="Center" Command="{Binding LoadMainImageCommand}" Content="Upload main"/>
+                    <Button HorizontalAlignment="Center" Command="{Binding LoadMainCommand}" Content="Upload main"/>
                     <Button HorizontalAlignment="Center" Command="{Binding RemoveMainImageCommand}" Content="X"/>
                 </StackPanel>
 
                 <!-- Load hidden -->
                 <StackPanel Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" Orientation="Horizontal">
-                    <Button HorizontalAlignment="Center" Command="{Binding LoadHiddenImageCommand}" Content="Upload hidden"/>
+                    <Button HorizontalAlignment="Center" Command="{Binding LoadHiddenCommand}" Content="Upload hidden"/>
                     <Button HorizontalAlignment="Center" Command="{Binding RemoveHiddenImageCommand}" Content="X"/>
                 </StackPanel>
                 

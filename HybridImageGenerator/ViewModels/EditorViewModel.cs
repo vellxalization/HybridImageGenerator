@@ -14,8 +14,11 @@ using SkiaSharp;
 
 namespace HybridImageGenerator.ViewModels;
 
-public partial class EditorViewModel(ImageFileService fileService, ImageEditor editor, DiscordImageRescaler rescaler, 
-    Func<ErrorDetails, ErrorViewModel> errorVmCreator) : ViewModelBase {
+public partial class EditorViewModel : ViewModelBase {
+    private readonly ImageFileService _fileService;
+    private readonly ImageEditor _editor;
+    private readonly Func<ErrorDetails, ErrorViewModel> _errorVmCreator;
+    private DiscordImageRescaler _rescaler;
     
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveImageCommand))]
@@ -47,39 +50,56 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     private Size _mainSize;
     [ObservableProperty]
     private Size _hiddenSize;
-
     [ObservableProperty]
     private Size _controlsSize;
-
-    private DiscordImageRescaler _rescaler = rescaler;
+    
     private int? _mainImageWidth;
     private int? _mainImageHeight;
     [ObservableProperty]
     private bool _useSafeZones = true;
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ApplyNewSafeZonesCommand))]
-    private ushort _innerWidth = (ushort)rescaler.InnerWindowWidth;
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ApplyNewSafeZonesCommand))]
-    private ushort _innerHeight = (ushort)rescaler.InnerWindowHeight;
 
+    [ObservableProperty] 
+    [NotifyCanExecuteChangedFor(nameof(ApplyNewSafeZonesCommand))]
+    private ushort _innerWidth;
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ApplyNewSafeZonesCommand))]
+    private ushort _innerHeight;
+    
+    // firefox async command issue: https://github.com/AvaloniaUI/Avalonia/issues/11041
+    public RelayCommand LoadMainCommand { get; set; }
+    public RelayCommand LoadHiddenCommand { get; set; }
+    
+    public EditorViewModel(ImageFileService fileService, ImageEditor editor, DiscordImageRescaler rescaler,
+        Func<ErrorDetails, ErrorViewModel> errorVmCreator) 
+    {
+        _fileService = fileService;
+        _editor = editor;
+        _rescaler = rescaler;
+        _errorVmCreator = errorVmCreator;
+
+        _innerWidth = (ushort)rescaler.InnerWindowWidth;
+        _innerHeight = (ushort)rescaler.InnerWindowHeight;
+
+        LoadMainCommand = new RelayCommand(LoadMainImage);
+        LoadHiddenCommand = new RelayCommand(LoadHiddenImage);
+    }
+    
     partial void OnOutputLowChanged(byte value) {
-        if (editor.Initialized)
-            editor.OutputLow = value;
+        if (_editor.Initialized)
+            _editor.OutputLow = value;
     }
 
     partial void OnOpacityChanged(byte value) {
-        if (editor.Initialized)
-            editor.Opacity = value;
+        if (_editor.Initialized)
+            _editor.Opacity = value;
     }
 
     partial void OnGammaChanged(float value) {
-        if (editor.Initialized)
-            editor.Gamma = value;
+        if (_editor.Initialized)
+            _editor.Gamma = value;
     }
-
-    [RelayCommand]
-    private async Task LoadMainImage() {
+    
+    private async void LoadMainImage() {
         try {
             SKImage? image = await OpenImage();
             if (image is null) return;
@@ -92,9 +112,9 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
                 }
             }
             
-            if (!editor.TrySetMainImage(image, out string? error)) {
+            if (!_editor.TrySetMainImage(image, out string? error)) {
                 ErrorDetails details = new(false, error!);
-                await DialogHost.Show(errorVmCreator(details));
+                await DialogHost.Show(_errorVmCreator(details));
             }
 
             _mainImageWidth = image.Width;
@@ -102,7 +122,7 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
         }
         catch (Exception ex) {
             ErrorDetails details = new(false, ex.Message, ex.StackTrace);
-            await DialogHost.Show(errorVmCreator(details));
+            await DialogHost.Show(_errorVmCreator(details));
         }
     }
 
@@ -120,27 +140,26 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
         bool agreed = (bool)(await DialogHost.Show(viewModel, "MainDialogHost"))!;
         return agreed;
     }
-
-    [RelayCommand]
-    private async Task LoadHiddenImage() {
+    
+    private async void LoadHiddenImage() {
         try {
             SKImage? image = await OpenImage();
             if (image is null) return;
             
-            if (!editor.TrySetHiddenImage(image, out string? error)) {
+            if (!_editor.TrySetHiddenImage(image, out string? error)) {
                 ErrorDetails details = new(false, error!);
-                await DialogHost.Show(errorVmCreator(details));
+                await DialogHost.Show(_errorVmCreator(details));
             }
         }
         catch (Exception ex) {
             bool isFatal = ex is EditorNotInitializedException;
             ErrorDetails details = new(isFatal, ex.Message, ex.StackTrace);
-            await DialogHost.Show(errorVmCreator(details));
+            await DialogHost.Show(_errorVmCreator(details));
         }
     }
     
     private async Task<SKImage?> OpenImage() {
-        await using Stream? file = await fileService.SelectOpenFile();
+        await using Stream? file = await _fileService.SelectOpenFile();
         if (file is null) return null;
 
         using MemoryStream memoryStream = new((int)file.Length);
@@ -153,8 +172,8 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     [RelayCommand(CanExecute=nameof(CanSave))]
     private async Task SaveImage() {
         try {
-            using MemoryStream patchedImage = await editor.SaveAsync();
-            await using Stream? file = await fileService.SelectSaveFile();
+            using MemoryStream patchedImage = await _editor.SaveAsync();
+            await using Stream? file = await _fileService.SelectSaveFile();
             if (file is null || !file.CanWrite) return;
 
             patchedImage.Position = 0;
@@ -162,7 +181,7 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
         }
         catch (Exception ex) {
             ErrorDetails details = new(false, ex.Message, ex.StackTrace);
-            await DialogHost.Show(errorVmCreator(details));
+            await DialogHost.Show(_errorVmCreator(details));
         }
     }
 
@@ -170,7 +189,7 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
 
     [RelayCommand(CanExecute=nameof(CanRemoveMainImage))]
     private void RemoveMainImage() {
-        editor.RemoveMainImage();
+        _editor.RemoveMainImage();
         _mainImageWidth = null;
         _mainImageHeight = null;
     }
@@ -179,43 +198,43 @@ public partial class EditorViewModel(ImageFileService fileService, ImageEditor e
     
     [RelayCommand(CanExecute=nameof(CanRemoveHiddenImage))]
     private void RemoveHiddenImage() {
-        editor.RemoveHiddenImage();
+        _editor.RemoveHiddenImage();
     }
     
     private bool CanRemoveHiddenImage() => HiddenShader is not null;
 
     [RelayCommand]
     private async Task InitializeEditor() {
-        if (editor.Initialized) return;
+        if (_editor.Initialized) return;
 
         try {
-            editor.Initialize();
+            _editor.Initialize();
         }
         catch (Exception ex) {
             ErrorDetails details = new(true, ex.Message, ex.StackTrace);
-            await DialogHost.Show(errorVmCreator(details));
+            await DialogHost.Show(_errorVmCreator(details));
             return;
         }
         
-        editor.MainShaderChanged += (_, shader) => MainShader = shader;
-        editor.HiddenShaderChanged += (_, shader) => HiddenShader = shader;
-        editor.OutputLowShaderChanged += (_, shader) => OutputLowShader = shader;
-        editor.NegativeShaderChanged += (_, shader) => NegativeShader = shader;
-        editor.OverlayShaderChanged += (_, shader) => OverlayShader = shader;
-        editor.StitchShaderChanged += (_, shader) => StitchShader = shader;
-        editor.GammaShaderChanged += (_, shader) => GammaShader = shader;
+        _editor.MainShaderChanged += (_, shader) => MainShader = shader;
+        _editor.HiddenShaderChanged += (_, shader) => HiddenShader = shader;
+        _editor.OutputLowShaderChanged += (_, shader) => OutputLowShader = shader;
+        _editor.NegativeShaderChanged += (_, shader) => NegativeShader = shader;
+        _editor.OverlayShaderChanged += (_, shader) => OverlayShader = shader;
+        _editor.StitchShaderChanged += (_, shader) => StitchShader = shader;
+        _editor.GammaShaderChanged += (_, shader) => GammaShader = shader;
 
-        editor.MainSizeChanged += (_, size) => MainSize = size;
-        editor.HiddenSizeChanged += (_, size) => HiddenSize = size;
-        editor.SetRenderSize(ControlsSize);
+        _editor.MainSizeChanged += (_, size) => MainSize = size;
+        _editor.HiddenSizeChanged += (_, size) => HiddenSize = size;
+        _editor.SetRenderSize(ControlsSize);
     }
 
     [RelayCommand]
     private void UpdateControlsScale(SizeChangedEventArgs args) {
         ControlsSize = args.NewSize;
-        if (!editor.Initialized) return;
+        if (!_editor.Initialized) return;
         
-        editor.SetRenderSize(args.NewSize);
+        _editor.SetRenderSize(args.NewSize);
     }
 
     [RelayCommand]
