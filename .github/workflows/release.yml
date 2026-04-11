@@ -1,0 +1,47 @@
+﻿name: Create release
+run-name: Release of ${{ github.ref_name }}
+env:
+  PROJECT_PATH: HybridImageGenerator.Desktop/HybridImageGenerator.Desktop.csproj
+  RELEASES_PATH: HybridImageGenerator.Desktop/bin/Release/net9.0
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Publish Windows
+        run: dotnet publish $PROJECT_PATH -c Release -r win-x64 --self-contained
+
+      - name: Publish Linux
+        run: dotnet publish $PROJECT_PATH -c Release -r linux-x64 --self-contained
+
+      - name: Zip Windows
+        run: |
+          cd $RELEASES_PATH/win-x64
+          mv publish HybridImageGenerator
+          zip -rq $GITHUB_WORKSPACE/HybridImageGenerator-win-x64.zip HybridImageGenerator 
+
+      - name: Zip Linux
+        run: |
+          cd $RELEASES_PATH/linux-x64
+          mv publish HybridImageGenerator
+          tar -czf $GITHUB_WORKSPACE/HybridImageGenerator-linux-x64.tar.gz HybridImageGenerator
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: "Stable release"
+          files: |
+            HybridImageGenerator-win-x64.zip
+            HybridImageGenerator-linux-x64.tar.gz
