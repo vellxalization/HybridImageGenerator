@@ -4,7 +4,7 @@
 Hybrid Image Generator is an application designed to create hybrid images by taking advantage of specific image processing and the PNG format's `gAMA` chunk.
 
 ## 🚀 How to use the app
-1. **Run the app:** You can download the executable from the release page, use the [online version](https://vellxalization.github.io/HybridImageGenerator/) hosted on GitHub Pages, or build and run the app yourself (instructions provided below).
+1. **Run the app:** You can download the executable from the [releases](https://github.com/vellxalization/HybridImageGenerator/releases) page, use the [online version](https://vellxalization.github.io/HybridImageGenerator/) hosted on GitHub Pages, or build and run the app yourself (instructions provided below).
 2. **Load your images:** Select your "main" image (which will appear as the thumbnail) and your "hidden" image (which will be revealed when viewed in full-screen).
 > [!NOTE]
 > If you use the Discord Safe Zone tool, the app will warn you if your main image might cause scaling issues.
