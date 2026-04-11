@@ -48,6 +48,9 @@ dotnet publish -r linux-x64 -c Release --self-contained
 > You can use the `--output PATH` flag to publish the app to a specific directory.
 4. Run the generated executable.
 
+## ❗ Known issues
+* File types don't work properly when uploading images in Firefox browser
+
 ## 🎨 How does the effect work?
 The following section explains exactly how this effect is achieved from both an image processing standpoint and in terms of how it interacts with Discord's backend.
 
